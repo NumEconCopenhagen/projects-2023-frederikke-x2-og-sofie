@@ -104,10 +104,6 @@ class HouseholdSpecializationModelClass:
         opt.HM = HM[j]
         opt.LF = LF[j]
         opt.HF = HF[j]
-        
-        # Question 1
-        #define HF/HM
-        
 
         # e. print
         if do_print:
