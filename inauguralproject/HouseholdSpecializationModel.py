@@ -114,6 +114,8 @@ class HouseholdSpecializationModelClass:
 
     def solve(self,do_print=False):
         """ solve model continously """
+        #Brug optimizer lecture. Lav constraints, så de ikke kan arbejde/være hjemme mere end 24 timer (kig på c)
+        #Vi skal bruge return opt og utility (b)
 
         pass    
 
