@@ -1,9 +1,9 @@
 # \[Group name\]
 
 **Group members:**
-- A
-- B
-- C
+- Frederikke Larsen (zpf492)
+- Frederikke Lund (vqj770)
+- Sofie Petersen (bpz801)
 
 This repository contains  
 1. Inaugural project. 
