@@ -112,8 +112,44 @@ class HouseholdSpecializationModelClass:
 
         return opt
 
-    def solve(self,do_print=False):
+    def solve_cont(self,do_print=False):
         """ solve model continously """
+
+        par = self.par
+        sol = self.sol
+        opt = SimpleNamespace()
+        
+        # a. all possible choices
+        N = 100
+        x = np.linspace(0,25,N)
+        LM,HM,LF,HF = np.meshgrid(x,x,x,x) # all combinations
+    
+        LM = LM.ravel() # vector
+        HM = HM.ravel()
+        LF = LF.ravel()
+        HF = HF.ravel()
+
+        # b. calculate utility
+        u = self.calc_utility(LM,HM,LF,HF)
+    
+        # c. set to minus infinity if constraint is broken
+        I = (LM+HM > 24) | (LF+HF > 24) # | is "or"
+        u[I] = -np.inf
+    
+        # d. find maximizing argument
+        j = np.argmax(u)
+        
+        opt.LM = LM[j]
+        opt.HM = HM[j]
+        opt.LF = LF[j]
+        opt.HF = HF[j]
+
+        # e. print
+        if do_print:
+            for k,v in opt.__dict__.items():
+                print(f'{k} = {v:6.4f}')
+
+        return opt
         #Brug optimizer lecture. Lav constraints, så de ikke kan arbejde/være hjemme mere end 24 timer (kig på c)
         #Vi skal bruge return opt og utility (b)
 
