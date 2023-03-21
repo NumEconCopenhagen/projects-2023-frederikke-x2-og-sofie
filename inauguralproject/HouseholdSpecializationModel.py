@@ -118,38 +118,26 @@ class HouseholdSpecializationModelClass:
         par = self.par
         sol = self.sol
         opt = SimpleNamespace()
-        
-        # a. all possible choices
-        N = 100
-        x = np.linspace(0,25,N)
-        LM,HM,LF,HF = np.meshgrid(x,x,x,x) # all combinations
-    
-        LM = LM.ravel() # vector
-        HM = HM.ravel()
-        LF = LF.ravel()
-        HF = HF.ravel()
 
-        # b. calculate utility
-        u = self.calc_utility(LM,HM,LF,HF)
-    
-        # c. set to minus infinity if constraint is broken
-        I = (LM+HM > 24) | (LF+HF > 24) # | is "or"
-        u[I] = -np.inf
-    
-        # d. find maximizing argument
-        j = np.argmax(u)
-        
-        opt.LM = LM[j]
-        opt.HM = HM[j]
-        opt.LF = LF[j]
-        opt.HF = HF[j]
 
-        # e. print
-        if do_print:
-            for k,v in opt.__dict__.items():
-                print(f'{k} = {v:6.4f}')
+        from scipy import optimize
+        initial_guess = [11, 11, 11, 11]      
+        objective_function = lambda x: -self.calc_utility(x[0], x[1], x[2], x[3])
+        constraint1 = ({'type': 'ineq', 'fun': lambda x: 24-x[0]-x[1]})
+        constraint2  = ({'type': 'ineq', 'fun': lambda x: 24-x[2]-x[3]})
+        constraints = [constraint1, constraint2]
+        bounds = [(0, 24)]*4
+        
+        res = optimize.minimize(objective_function, initial_guess, method='SLSQP', constraints=constraints, bounds=bounds)
+    
+
+        opt.LM = res.x[0]
+        opt.HM = res.x[1]
+        opt.LF = res.x[2]
+        opt.HF = res.x[3]
 
         return opt
+    
         #Brug optimizer lecture. Lav constraints, så de ikke kan arbejde/være hjemme mere end 24 timer (kig på c)
         #Vi skal bruge return opt og utility (b)
 
