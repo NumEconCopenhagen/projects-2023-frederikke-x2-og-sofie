@@ -119,16 +119,16 @@ class HouseholdSpecializationModelClass:
         sol = self.sol
         opt = SimpleNamespace()
 
-
+        #Using the optimizer function to minimize the utility function
         from scipy import optimize
-        initial_guess = [11, 11, 11, 11]      
-        objective_function = lambda x: -self.calc_utility(x[0], x[1], x[2], x[3])
-        constraint1 = ({'type': 'ineq', 'fun': lambda x: 24-x[0]-x[1]})
-        constraint2  = ({'type': 'ineq', 'fun': lambda x: 24-x[2]-x[3]})
-        constraints = [constraint1, constraint2]
-        bounds = [(0, 24)]*4
+        initial_guess = [11, 11, 11, 11] #Our guess      
+        objective_function = lambda x: -self.calc_utility(x[0], x[1], x[2], x[3]) #Using the utility function of LM, HM, LF, HF
+        constraint1 = ({'type': 'ineq', 'fun': lambda x: 24-x[0]-x[1]}) #Constraint to ensure that the male can not work or be home more than 24 hours
+        constraint2  = ({'type': 'ineq', 'fun': lambda x: 24-x[2]-x[3]}) #Constraint to ensure that the female can not work or be home more than 24 hours
+        constraints = [constraint1, constraint2] #Making a list of the constraints
+        bounds = [(0, 24)]*4 #Bounds to ensure that the time used on each parameter is included in a day of 24 hours (4 parameters)
         
-        res = optimize.minimize(objective_function, initial_guess, method='SLSQP', constraints=constraints, bounds=bounds)
+        res = optimize.minimize(objective_function, initial_guess, method='SLSQP', constraints=constraints, bounds=bounds) #Making the optimizer function
     
 
         opt.LM = res.x[0]
@@ -137,9 +137,6 @@ class HouseholdSpecializationModelClass:
         opt.HF = res.x[3]
 
         return opt
-    
-        #Brug optimizer lecture. Lav constraints, så de ikke kan arbejde/være hjemme mere end 24 timer (kig på c)
-        #Vi skal bruge return opt og utility (b)
 
         pass    
 
