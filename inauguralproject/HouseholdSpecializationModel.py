@@ -142,8 +142,27 @@ class HouseholdSpecializationModelClass:
 
     def solve_wF_vec(self,discrete=False):
         """ solve model for vector of female wages """
+        par = self.par
+        sol = self.sol
+        opt = SimpleNamespace()
 
-        pass
+        # Create an empty array to store the optimal labor supply
+        temp_ratio = np.zeros_like(wf)
+        temp_beta0 = np.zeros_like(wf)
+        temp_beta1 = np.zeros_like(wf)
+
+        # Define the alpha and sigma lists
+        alpha_list = np.linspace(0.1, 1,10)
+        sigma_list = np.linspace(0.1, 1,10)
+
+          for i, w_F in enumerate(par.wF_vec):
+            par.wF = w_F
+            if discrete:
+                opt = self.solve_discrete()
+            else:
+                opt = self.solve()
+            if opt is not None:
+                sol.LM_vec[i], sol.HM_vec[i], sol.LF_vec[i], sol.HF_vec[i] = opt.LM, opt.HM, opt.LF, opt.HF
 
     def run_regression(self):
         """ run regression """
