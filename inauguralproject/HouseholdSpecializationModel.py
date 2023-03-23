@@ -155,14 +155,21 @@ class HouseholdSpecializationModelClass:
         alpha_list = np.linspace(0.1, 1,10)
         sigma_list = np.linspace(0.1, 1,10)
 
-          for i, w_F in enumerate(par.wF_vec):
+    def solve_wF_vec(self,discrete=False):
+        #used to illustrate question 4
+
+        sol = self.sol
+        par = self.par
+
+        for i, w_F in enumerate(par.wF_vec):
             par.wF = w_F
             if discrete:
                 opt = self.solve_discrete()
             else:
-                opt = self.solve()
+                opt = self.solve_cont()
             if opt is not None:
                 sol.LM_vec[i], sol.HM_vec[i], sol.LF_vec[i], sol.HF_vec[i] = opt.LM, opt.HM, opt.LF, opt.HF
+                
 
     def run_regression(self):
         """ run regression """
