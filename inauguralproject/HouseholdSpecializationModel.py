@@ -147,9 +147,9 @@ class HouseholdSpecializationModelClass:
         opt = SimpleNamespace()
 
         # Create an empty array to store the optimal labor supply
-        temp_ratio = np.zeros_like(wf)
-        temp_beta0 = np.zeros_like(wf)
-        temp_beta1 = np.zeros_like(wf)
+        temp_ratio = np.zeros_like(wF)
+        temp_beta0 = np.zeros_like(wF)
+        temp_beta1 = np.zeros_like(wF)
 
         # Define the alpha and sigma lists
         alpha_list = np.linspace(0.1, 1,10)
