@@ -116,15 +116,15 @@ class AnalysismodelclassOLG():
     
     def euler(self):
         par = self.par
-        '''
-        Finding Euler
+        #'''
+        #Finding Euler
         
-        Args: 
-        parameters from setup       : see setup(self) for definition
+        #Args: 
+        #parameters from setup       : see setup(self) for definition
 
-        Returns:
-        (sympy function)            : Euler equation
-        '''
+        #Returns:
+        #(sympy function)            : Euler equation
+        #'''
         
         
         # a. Setting up the Lagrangian 
