@@ -3,8 +3,8 @@ import sympy as sm
 import numpy as np
 from types import SimpleNamespace
 
-class OLGmodelClass():
-    ''' create the model '''
+class AnalysismodelclassOLG():
+    #''' create the model '''
     def __init__(self):
         
 
@@ -14,7 +14,7 @@ class OLGmodelClass():
     def setup(self):
         par = self.par
 
-        '''Define parameters and variables'''
+        #'''Define parameters and variables'''
 
         # a. Utility function
         # i. Consumption when young
@@ -85,15 +85,15 @@ class OLGmodelClass():
         
     def utility(self):
         par = self.par
-        '''
-        Defining the utility function
+        #'''
+        #Defining the utility function
 
-        Args: 
-        parameters from setup       : see setup(self) for definitions
+        #Args: 
+        #parameters from setup       : see setup(self) for definitions
 
-        Returns:
-        (sympy function)           : utility function, Ut
-        '''
+        #Returns:
+        #(sympy function)           : utility function, Ut
+        #'''
 
         return sm.log(par.c1t)+ sm.log(par.c2t) * 1/(1+par.rho)
     
@@ -101,15 +101,15 @@ class OLGmodelClass():
     def budgetconstraint(self):
         par = self.par
         
-        '''
-        Defining the intertemporal budget constraint
+        #'''
+        #Defining the intertemporal budget constraint
         
-        Args: 
-        parameters from setup       : see setup(self) for definition
+        #Args: 
+        #parameters from setup       : see setup(self) for definition
 
-        Returns:
-        (sympy function)           : intertemporal budget constraint
-        '''
+        #Returns:
+        #(sympy function)           : intertemporal budget constraint
+        #'''
 
         # a. Define benefit when old as tau * w_(t+1)
         dt1 = par.tau * par.wt1 
