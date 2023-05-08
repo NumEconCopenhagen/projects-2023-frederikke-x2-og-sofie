@@ -4,7 +4,7 @@ import numpy as np
 from types import SimpleNamespace
 
 class AnalysismodelclassOLG():
-    #''' create the model '''
+    # The OLG model is being coded
     def __init__(self):
         
 
@@ -14,76 +14,59 @@ class AnalysismodelclassOLG():
     def setup(self):
         par = self.par
 
-        #'''Define parameters and variables'''
+        #All the parameters and the variables are being defined
 
-        # a. Utility function
-        # i. Consumption when young
-        par.c1t = sm.symbols('c_1t')        
+        # a. The variables and parameters used for the utility function 
+        par.cy1t = sm.symbols('c_1t')    # 1. Consumption in period t, when young.      
         
-        # ii. Consumption when old
-        par.c2t = sm.symbols('c_{2t+1}')    
+        par.co2t = sm.symbols('c_{2t+1}')   # 2. Consumption in period t+1, when old. 
         
-        # iii. Time preference (patience)
-        par.rho = sm.symbols('rho')       
+        par.rho = sm.symbols('rho')  # 3. The time preference and/or patience  
 
         
-        # b. Budget constraints
-        # i. Interest rate in period t and t+1
-        par.rt = sm.symbols('r_t')          
-        par.rt1 = sm.symbols('r_{t+1}')     
+        # b. The variables and parameters used for the budget constraints
+        par.r_t = sm.symbols('r_t')  # 1. The interest rate in period t        
+        par.r_t1 = sm.symbols('r_{t+1}')    # 2. The interest rate  in period t+1
         
-        # ii. Wage rate in period t and t+1 
-        par.wt = sm.symbols('w_t')          
-        par.wt1 = sm.symbols('w_{t+1}')     
+        par.w_t = sm.symbols('w_t')   # 3. The Wage rate in period t       
+        par.w_t1 = sm.symbols('w_{t+1}')   # 4. The wage rate in period t+1 
         
-        # iii. Benefit in period t+1 
-        par.dt1 = sm.symbols('d_{t+1}')     
+        par.d_t1 = sm.symbols('d_{t+1}')   # 5. The benefit in period t+1 
         
-        # iv. Population growth
-        par.n = sm.symbols('n')             
+        par.n = sm.symbols('n')    # 6. The constant populations growth          
         
-        # v. Wage tax rate 
-        par.tau = sm.symbols('tau')         
+        par.tau = sm.symbols('tau')     # 7. The tax rate on wage    
         
-        # vi. Savings rate 
-        par.st = sm.symbols('s_t')
+        par.s_t = sm.symbols('s_t')    # 8. The rate on savings 
         
-        # vii. Lagrange multiplier
-        par.lam = sm.symbols('lambda_t')
+        par.lamb = sm.symbols('lambda_t')   # 9. The lagrange multiplier 
         
 
-        # c. Production function
-        # i. Capital in period t and t+1
-        par.Kt = sm.symbols('K_t')          
-        par.Kt1 = sm.symbols('K_{t+1}')     
+        # c. The variables and parameters used for the production function
+        par.K_t = sm.symbols('K_t')   # 1. Capital in peirod t       
+        par.K_t1 = sm.symbols('K_{t+1}')     # 2. Capital in period t+1
         
-        # ii. Labor in period t and t+1
-        par.Lt = sm.symbols('L_t')          
-        par.Lt1 = sm.symbols('L_{t+1}')     
+        par.L_t = sm.symbols('L_t')     # 3. The labour in period t     
+        par.L_t1 = sm.symbols('L_{t+1}')     # 4. The labour in period t+1
         
-        # iii. Total factor productivity
-        par.A = sm.symbols('A')             
+        par.A = sm.symbols('A')    # 5. The constant total factor of productivity         
         
-        # iv. Utility 
-        par.Ut = sm.symbols('U_t')          
+        par.U_t = sm.symbols('U_t')   # 6. Utility in period t       
+    
+        par.alpha = sm.symbols('alpha')    # 7. The elasticity in the CES function
         
-        # v. CES-elasticity
-        par.alpha = sm.symbols('alpha')  
+        par.k_t = sm.symbols('k_t')      # 8. Per worker caiptal in period t    
+        par.k_t1 = sm.symbols('k_{t+1}')     # 9. Per worker caital in period t+1
         
-        # vi. Capital per worker in period t and t+1
-        par.kt = sm.symbols('k_t')          
-        par.kt1 = sm.symbols('k_{t+1}')     
+        par.kss = sm.symbols('k^*')    # 10. Steaty State for caital 
         
-        # vii. Capital in steady state
-        par.kss = sm.symbols('k^*') 
-        
-        # d. Auxiliary variables
+        # d. Variables for the Auxiliary regression 
         par.a = sm.symbols('a')
         par.b = sm.symbols('b')
         par.c = sm.symbols('c')
 
         
-    def utility(self):
+    def utilityfunc(self):
         par = self.par
         #'''
         #Defining the utility function
@@ -95,7 +78,7 @@ class AnalysismodelclassOLG():
         #(sympy function)           : utility function, Ut
         #'''
 
-        return sm.log(par.c1t)+ sm.log(par.c2t) * 1/(1+par.rho)
+        return sm.log(par.cy1t)+ sm.log(par.co2t) * 1/(1+par.rho)
     
     
     def budgetconstraint(self):
@@ -112,21 +95,21 @@ class AnalysismodelclassOLG():
         #'''
 
         # a. Define benefit when old as tau * w_(t+1)
-        dt1 = par.tau * par.wt1 
+        d_t1 = par.tau * par.w_t1 
 
         # b. Define period budget constraints as sympy equations
-        bc_t1 = sm.Eq(par.c1t + par.st, (1-par.tau) * par.wt)
-        bc_t2 = sm.Eq(par.c2t, par.st * (1 + par.rt1)+ (1 + par.n) * dt1)
+        bc_t1 = sm.Eq(par.cy1t + par.s_t, (1-par.tau) * par.w_t)
+        bc_t2 = sm.Eq(par.co2t, par.s_t * (1 + par.r_t1)+ (1 + par.n) * d_t1)
 
         # c. Solving for savings in the second budget constraint
-        bc_t2_s = sm.solve(bc_t2, par.st)
+        bc_t2_s = sm.solve(bc_t2, par.s_t)
 
         # e. Inserting savings into the first budget constraint
-        bc1 = bc_t1.subs(par.st, bc_t2_s[0])
+        bc1 = bc_t1.subs(par.s_t, bc_t2_s[0])
 
         # d. Defining LHS og RHS for budget constraint
-        RHS =  sm.solve(bc1, par.wt*(1 - par.tau))[0]
-        LHS = par.wt * (1 - par.tau)
+        RHS =  sm.solve(bc1, par.w_t*(1 - par.tau))[0]
+        LHS = par.w_t * (1 - par.tau)
 
         return RHS - LHS
            
@@ -145,51 +128,51 @@ class AnalysismodelclassOLG():
         
         
         # a. Setting up the Lagrangian 
-        lagrange = self.utility() + par.lam * self.budgetconstraint()
+        lagrange = self.utility() + par.lamb * self.budgetconstraint()
         
         # b. Finding the first order conditions
-        foc1 = sm.Eq(0, sm.diff(lagrange, par.c1t))
-        foc2 = sm.Eq(0, sm.diff(lagrange, par.c2t))
+        foc1 = sm.Eq(0, sm.diff(lagrange, par.cy1t))
+        foc2 = sm.Eq(0, sm.diff(lagrange, par.co2t))
         
         # c. Solving for lambda for the two FOC
-        lamb1 = sm.solve(foc1, par.lam)[0]
-        lamb2 = sm.solve(foc2, par.lam)[0]
+        lamb_1 = sm.solve(foc1, par.lamb)[0]
+        lamb_2 = sm.solve(foc2, par.lamb)[0]
         
         
         # d. Define Euler
-        euler1 = sm.solve(sm.Eq(lamb1,lamb2), par.c1t)[0]
+        euler_1 = sm.solve(sm.Eq(lamb_1,lamb_2), par.cy1t)[0]
 
         # e. Return Euler equation
-        return sm.Eq(euler1, par.c1t)
+        return sm.Eq(euler_1, par.cy1t)
     
     
     def optimalsavings(self):
         par = self.par
-        '''
-        Finding the optimal savings function
+        #'''
+        #Finding the optimal savings function
         
-        Args: 
-        parameters from setup       : see setup(self) for definition
+        #Args: 
+        #parameters from setup       : see setup(self) for definition
 
-        Returns:
-        (sympy function)            : optimal savingsfunction
-        '''
+        #Returns:
+        #(sympy function)            : optimal savingsfunction
+        #'''
         
         # a. Define benefit when old as tau * w_(t+1)
-        dt1 = par.tau * par.wt1 
+        d_t1 = par.tau * par.w_t1 
 
         # b. Define period budget constraints 
-        bc_t1 = (1-par.tau) * par.wt - par.st 
-        bc_t2 = par.st * (1 + par.rt1)+ (1 + par.n) * dt1
+        bc_t1 = (1-par.tau) * par.w_t - par.s_t 
+        bc_t2 = par.s_t * (1 + par.r_t1)+ (1 + par.n) * d_t1
 
         # c. Substitute budget constraints into Euler
         eul = self.euler()
-        sav = (eul.subs(par.c1t , bc_t1)).subs(par.c2t , bc_t2)
+        sav = (eul.subs(par.cy1t , bc_t1)).subs(par.co2t , bc_t2)
                 
         # d. Simplify expression
-        saving1 = sm.solve(sav, par.st)[0]
+        saving1 = sm.solve(sav, par.s_t)[0]
         saving2 = sm.collect(saving1, [par.tau])
-        saving = sm.collect(saving1, [par.wt, par.wt1])
+        saving = sm.collect(saving1, [par.w_t, par.w_t1])
         
         
         # e. Return optimal saving
@@ -200,28 +183,28 @@ class AnalysismodelclassOLG():
     def capitalaccumulation(self):
         par = self.par
 
-        '''
-        Finding capital accumulation
+        #'''
+       # Finding capital accumulation
         
-        Args: 
-        parameters from setup       : see setup(self) for definition
+       # Args: 
+        #parameters from setup       : see setup(self) for definition
 
-        Returns:
-        (sympy function)            : capital accumulation
-        '''
+       # Returns:
+       # (sympy function)            : capital accumulation
+       # '''
         # a. Auxiliary variables
         a = (1 / (1 + (1+par.rho)/(2+par.rho)*((1-par.alpha)/par.alpha) * par.tau))
         b = ((1-par.alpha)*(1-par.tau))/((1+par.n)*(2+par.rho))
-        c = par.A * par.kt**par.alpha
+        c = par.A * par.k_t**par.alpha
          
         # b. Deriving and displaying the capital accumulation
         kt_00 = par.a * (par.b * par.c)
         kt_01 = ((kt_00.subs(par.a , a)).subs(par.b ,b)).subs(par.c,c)
-        kt = sm.Eq(par.kt1, kt_01)
+        k_t = sm.Eq(par.k_t1, kt_01)
         
         print('The capital accumulation is')
                 
-        return kt
+        return k_t
         
         
         
@@ -229,15 +212,15 @@ class AnalysismodelclassOLG():
     def steadystate_capital(self):
         par = self.par
 
-        '''
-        Finding capital in steady state
+       # '''
+        #Finding capital in steady state
         
-        Args: 
-        parameters from setup       : see setup(self) for definition
+       # Args: 
+       # parameters from setup       : see setup(self) for definition
 
-        Returns:
-        (sympy function)            : steady state for capital
-        '''
+       # Returns:
+       # (sympy function)            : steady state for capital
+       # '''
         
         # a. Auxiliary variables
         a = (1 / (1 + (1+par.rho)/(2+par.rho)*((1-par.alpha)/par.alpha) * par.tau))
@@ -249,6 +232,6 @@ class AnalysismodelclassOLG():
         k_star1 = ((k_star0.subs(par.a , a)).subs(par.b ,b)).subs(par.c,c)
         k_star = sm.Eq(par.kss, k_star1)
         
-        display(k_star)
+        print(k_star)
         
         return k_star1
