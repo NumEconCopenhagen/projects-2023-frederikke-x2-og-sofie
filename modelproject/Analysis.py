@@ -128,7 +128,7 @@ class AnalysismodelclassOLG():
         
         
         # a. Setting up the Lagrangian 
-        lagrange = self.utility() + par.lamb * self.budgetconstraint()
+        lagrange = self.utilityfunc() + par.lamb * self.budgetconstraint()
         
         # b. Finding the first order conditions
         foc1 = sm.Eq(0, sm.diff(lagrange, par.cy1t))
