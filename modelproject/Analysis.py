@@ -69,7 +69,7 @@ class AnalysismodelclassOLG():
     def utilityfunc(self):
         par = self.par
         # The utility function is set up
-        # self refers to the variables and paremeters from the "setu(self)"
+        # self refers to the variables and paremeters from the "setup(self)"
         # Return is a sympy function, which returns the utility function denoted as U_t
 
         return sm.log(par.cy1t)+ sm.log(par.co2t) * 1/(1+par.rho)
@@ -79,7 +79,7 @@ class AnalysismodelclassOLG():
         par = self.par
         
         #The intertemporal budget constraint function is set up
-        # self refers to the variables and paremeters from the "setu(self)"
+        # self refers to the variables and paremeters from the "setup(self)"
         # Return is a sympy function, which returns the functino for the intertemoral budget constraint, which is solved when 
         # Right hand side (RHS) equals the left hand side (LHS)
         
@@ -102,7 +102,7 @@ class AnalysismodelclassOLG():
     def euler(self):
         par = self.par
         # The equations used to find the Euler equation is found
-        # self refers to the variables and paremeters from the "setu(self)"
+        # self refers to the variables and paremeters from the "setup(self)"
         # Return is a sympy function, which returns the Euler equation denoted as euler_1
         
         lagrange = self.utilityfunc() + par.lamb * self.budgetcon() # 1. The Lagrangian is definded
@@ -115,40 +115,29 @@ class AnalysismodelclassOLG():
         
         euler_1 = sm.solve(sm.Eq(lamb_1,lamb_2), par.cy1t)[0] # 5. The Euler equation is defined 
 
-        # e. Return Euler equation
         return sm.Eq(euler_1, par.cy1t)
     
     
     def optimalsavings(self):
         par = self.par
-        #'''
-        #Finding the optimal savings function
+        # The equations used to find the optimal saving is defined
+        # self refers to the variables and paremeters from the "setup(self)"
+        # Return is a sympy function, which returns the optimal saving denoted as saving
         
-        #Args: 
-        #parameters from setup       : see setup(self) for definition
+        d_t1 = par.tau * par.w_t1 # 1. Defining the benefit when old 
+ 
+        bc_t1 = (1-par.tau) * par.w_t - par.s_t # 2. Defining the budget constraint when young
+        bc_t2 = par.s_t * (1 + par.r_t1)+ (1 + par.n) * d_t1 # 3. Defining the budget constraint when old
 
-        #Returns:
-        #(sympy function)            : optimal savingsfunction
-        #'''
-        
-        # a. Define benefit when old as tau * w_(t+1)
-        d_t1 = par.tau * par.w_t1 
-
-        # b. Define period budget constraints 
-        bc_t1 = (1-par.tau) * par.w_t - par.s_t 
-        bc_t2 = par.s_t * (1 + par.r_t1)+ (1 + par.n) * d_t1
-
-        # c. Substitute budget constraints into Euler
-        eul = self.euler()
+        # 4. The budget constraints are substituted into the Euler equation
+        eul = self.euler() 
         sav = (eul.subs(par.cy1t , bc_t1)).subs(par.co2t , bc_t2)
                 
-        # d. Simplify expression
+        # d. The exprestions are being simplified
         saving1 = sm.solve(sav, par.s_t)[0]
         saving2 = sm.collect(saving1, [par.tau])
         saving = sm.collect(saving1, [par.w_t, par.w_t1])
         
-        
-        # e. Return optimal saving
         return saving       
        
 
@@ -156,26 +145,21 @@ class AnalysismodelclassOLG():
     def capitalaccumulation(self):
         par = self.par
 
-        #'''
-       # Finding capital accumulation
-        
-       # Args: 
-        #parameters from setup       : see setup(self) for definition
+        # The equations used to find the caital accumulation is defined
+        # self refers to the variables and paremeters from the "setup(self)"
+        # Return is a sympy function, which returns the capital accumulaiton denoted as k_t
 
-       # Returns:
-       # (sympy function)            : capital accumulation
-       # '''
-        # a. Auxiliary variables
+        # a. Auxiliary variables are being defined, to make it easier to refer to later
         a = (1 / (1 + (1+par.rho)/(2+par.rho)*((1-par.alpha)/par.alpha) * par.tau))
         b = ((1-par.alpha)*(1-par.tau))/((1+par.n)*(2+par.rho))
         c = par.A * par.k_t**par.alpha
          
-        # b. Deriving and displaying the capital accumulation
+        # b. The capital accumulation is derived and dislayed using the auxiliary variables as reference
         kt_00 = par.a * (par.b * par.c)
         kt_01 = ((kt_00.subs(par.a , a)).subs(par.b ,b)).subs(par.c,c)
         k_t = sm.Eq(par.k_t1, kt_01)
         
-        print('The capital accumulation is')
+        print('We find the capital accumulation to be given by')
                 
         return k_t
         
@@ -185,26 +169,20 @@ class AnalysismodelclassOLG():
     def steadystate_capital(self):
         par = self.par
 
-       # '''
-        #Finding capital in steady state
+        # The equations used to find the steady sate for caital is defined
+        # self refers to the variables and paremeters from the "setup(self)"
+        # Return is a sympy function, which returns the steady state for capital denoted as k_star
         
-       # Args: 
-       # parameters from setup       : see setup(self) for definition
-
-       # Returns:
-       # (sympy function)            : steady state for capital
-       # '''
-        
-        # a. Auxiliary variables
+        # a. Auxiliary variables are being defined, to make it easier to refer to later
         a = (1 / (1 + (1+par.rho)/(2+par.rho)*((1-par.alpha)/par.alpha) * par.tau))
         b = ((1-par.alpha)*(1-par.tau))/((1+par.n)*(2+par.rho))
         c = 1 / (1-par.alpha)
         
-        # a. substituting steady state in    
+        # a. The steady state is substituted in    
         k_star0 = (a * b * par.A )** par.c
         k_star1 = ((k_star0.subs(par.a , a)).subs(par.b ,b)).subs(par.c,c)
         k_star = sm.Eq(par.kss, k_star1)
         
-        print(k_star)
+        print('We find the strady state is')
         
-        return k_star1
+        return k_star
