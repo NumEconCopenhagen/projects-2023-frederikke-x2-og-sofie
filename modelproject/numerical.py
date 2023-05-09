@@ -7,7 +7,7 @@ plt.style.use('seaborn-whitegrid')
 
 # b. The OLG model is contructed as a numerical solution class
 
-class OLG_modelClass():
+class NumericalmodelclassOLG():
     
     ''' Equation system of the OLG model '''
 
@@ -26,32 +26,32 @@ class OLG_modelClass():
 
         # a. Parameter values
 
-        # i. Input share of capital in Cobb-Douglas 
-        self.alpha = 1/3
+       
+        self.alpha = 1/3  # 1. The share of capital in Cobb-douglas 
 
-        # ii. Time preference parameter 
-        self.rho = 0.25
+        
+        self.rho = 0.25  # 2. Time preference parameter 
 
-        # ii. Population growth rate
-        self.n = 0.01
+        
+        self.n = 0.01  # 3. Constant growth rate of population
 
-        # ii. Contribution fractions
-        self.tau = 0.25
+        
+        self.tau = 0.25  # 4. Share of wages to  contribution
 
-        # ii. Production technology 
-        self.A = 20
+        
+        self.A = 20  # 5. Technology 
 
 
-        # b. Properties of the transition curve are defined
+        # b. Defining the properties of the transition curve 
 
-        # i. Number of grids on the transition diagram
-        self.kN = 1000
+        
+        self.kN = 1000  # 1. Amount of grids on the transition diagram
 
-        # ii. Minimum level of capital
-        self.kmin = 1e-6
+        
+        self.kmin = 1e-6  # 2. The minimum level of capital
 
-        # ii. Maximum level of capital
-        self.kmax = 20
+        
+        self.kmax = 20  # 3. The maximum level of capital
 
 
     def parameters_new(self, kwargs):
@@ -79,14 +79,14 @@ class OLG_modelClass():
             y_prime (function): Derivative of production per capita
 
         '''
-        # a. Defining lower bound of capital and consumption as marginally above zero
+        # a. The lower bound of capital and consumption is defined as marginally above zero
         epsilon = 1e-10
 
         self.ss = 0
-        # b. Utility function defined
+        # b. Defining the utility function 
         self.u = lambda c_t: np.log(np.fmax(c_t,epsilon))
 
-        # c. Production functions defined
+        # c. Defining the production per capita function and the function of the derivative of production per capita
         self.y = lambda k_t: self.A * np.fmax(k_t,epsilon)**self.alpha
         self.y_prime = lambda k_t: self.alpha * self.A * np.fmax(k_t,epsilon)**(self.alpha-1)
     
