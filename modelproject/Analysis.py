@@ -183,6 +183,6 @@ class AnalysismodelclassOLG():
         k_star1 = ((k_star0.subs(par.a , a)).subs(par.b ,b)).subs(par.c,c)
         k_star = sm.Eq(par.kss, k_star1)
         
-        print('We find the strady state is')
+        display(k_star)
         
-        return k_star
+        return k_star1
