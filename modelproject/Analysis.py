@@ -68,71 +68,47 @@ class AnalysismodelclassOLG():
         
     def utilityfunc(self):
         par = self.par
-        #'''
-        #Defining the utility function
-
-        #Args: 
-        #parameters from setup       : see setup(self) for definitions
-
-        #Returns:
-        #(sympy function)           : utility function, Ut
-        #'''
+        # The utility function is set up
+        # self refers to the variables and paremeters from the "setu(self)"
+        # Return is a sympy function, which returns the utility function denoted as U_t
 
         return sm.log(par.cy1t)+ sm.log(par.co2t) * 1/(1+par.rho)
     
     
-    def budgetconstraint(self):
+    def budgetcon(self):
         par = self.par
         
-        #'''
-        #Defining the intertemporal budget constraint
+        #The intertemporal budget constraint function is set up
+        # self refers to the variables and paremeters from the "setu(self)"
+        # Return is a sympy function, which returns the functino for the intertemoral budget constraint, which is solved when 
+        # Right hand side (RHS) equals the left hand side (LHS)
         
-        #Args: 
-        #parameters from setup       : see setup(self) for definition
+        d_t1 = par.tau * par.w_t1 # 1. Defining the benefit when old 
 
-        #Returns:
-        #(sympy function)           : intertemporal budget constraint
-        #'''
+        bc_t1 = sm.Eq(par.cy1t + par.s_t, (1-par.tau) * par.w_t) # 2. The sympy equations for the budget constraint when young is defined 
+        bc_t2 = sm.Eq(par.co2t, par.s_t * (1 + par.r_t1)+ (1 + par.n) * d_t1) # 3. The sympy equations for the budget constraint when old is defined 
 
-        # a. Define benefit when old as tau * w_(t+1)
-        d_t1 = par.tau * par.w_t1 
-
-        # b. Define period budget constraints as sympy equations
-        bc_t1 = sm.Eq(par.cy1t + par.s_t, (1-par.tau) * par.w_t)
-        bc_t2 = sm.Eq(par.co2t, par.s_t * (1 + par.r_t1)+ (1 + par.n) * d_t1)
-
-        # c. Solving for savings in the second budget constraint
-        bc_t2_s = sm.solve(bc_t2, par.s_t)
+        bc_t2_s = sm.solve(bc_t2, par.s_t) # 4. Saving is solved by using the budget constraint when old using sympy
 
         # e. Inserting savings into the first budget constraint
-        bc1 = bc_t1.subs(par.s_t, bc_t2_s[0])
+        bc1 = bc_t1.subs(par.s_t, bc_t2_s[0]) # 5. The solved savings rate is inserted into the budget constraint when young 
 
-        # d. Defining LHS og RHS for budget constraint
-        RHS =  sm.solve(bc1, par.w_t*(1 - par.tau))[0]
-        LHS = par.w_t * (1 - par.tau)
+        RHS =  sm.solve(bc1, par.w_t*(1 - par.tau))[0] # 6. The right hand side of the budget constraint is defined 
+        LHS = par.w_t * (1 - par.tau) # 7. The left hand side of the budget constraint is defined 
 
         return RHS - LHS
            
     
     def euler(self):
         par = self.par
-        #'''
-        #Finding Euler
+        # The equations used to find the Euler equation is found
+        # self refers to the variables and paremeters from the "setu(self)"
+        # Return is a sympy function, which returns the Euler equation denoted as euler_1
         
-        #Args: 
-        #parameters from setup       : see setup(self) for definition
-
-        #Returns:
-        #(sympy function)            : Euler equation
-        #'''
+        lagrange = self.utilityfunc() + par.lamb * self.budgetcon() # 1. The Lagrangian is definded
         
-        
-        # a. Setting up the Lagrangian 
-        lagrange = self.utilityfunc() + par.lamb * self.budgetconstraint()
-        
-        # b. Finding the first order conditions
-        foc1 = sm.Eq(0, sm.diff(lagrange, par.cy1t))
-        foc2 = sm.Eq(0, sm.diff(lagrange, par.co2t))
+        foc1 = sm.Eq(0, sm.diff(lagrange, par.cy1t)) # 1. The firs order condition wrt the consumption when young
+        foc2 = sm.Eq(0, sm.diff(lagrange, par.co2t)) # 2. The firs order condition wrt the consumption when old
         
         # c. Solving for lambda for the two FOC
         lamb_1 = sm.solve(foc1, par.lamb)[0]
