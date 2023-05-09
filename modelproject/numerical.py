@@ -9,11 +9,12 @@ plt.style.use('seaborn-whitegrid')
 
 class NumericalmodelclassOLG():
     
-    ''' Equation system of the OLG model '''
+    #Equation system of the OLG model
 
     def __init__(self, **kwargs):
 
-        ''' The attributes of the objects within the class are initialized '''
+        #Within the class the attributes of the objects are initialized
+         # self refers to the variables and paremeters from the "setup(self)"
 
         self.parameters_initial()
         self.parameters_new(kwargs)
@@ -22,7 +23,9 @@ class NumericalmodelclassOLG():
 
     def parameters_initial(self):
 
-        ''' Setting the baseline parameters of the model '''
+        #The parameters and variables are being defined
+         # self refers to the variables and paremeters from the "setup(self)"
+
 
         # a. Parameter values
 
@@ -42,7 +45,8 @@ class NumericalmodelclassOLG():
         self.A = 20  # 5. Technology 
 
 
-        # b. Defining the properties of the transition curve 
+        # b. The variables of the transition curve is defined
+            # self refers to the variables and paremeters from the "setup(self)" 
 
         
         self.kN = 1000  # 1. Amount of grids on the transition diagram
@@ -56,7 +60,7 @@ class NumericalmodelclassOLG():
 
     def parameters_new(self, kwargs):
 
-        ''' Setting up values for attributes in object, "self" '''
+        # self refers to the variables and paremeters from the "setup(self)"
 
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -64,21 +68,18 @@ class NumericalmodelclassOLG():
 
     def functions_model(self):
 
-        ''' Defining functions of the model
+       #Defining functions of the model
+            #Args: 
+            # self (setup): Parameters from the OLG class
+            # c_t (float): Consumption in period t
+            # k_t (float): Capital per capita in period t
 
-        Args: 
+        #Returns: 
+            #u (function): Utility of current consumption
+            # y (function): Production per capita
+            # y_prime (function): Derivative of production per capita
 
-            self (setup): Parameters from the OLG class
-            c_t (float): Consumption in period t
-            k_t (float): Capital per capita in period t
-
-        Returns: 
-        
-            u (function): Utility of current consumption
-            y (function): Production per capita
-            y_prime (function): Derivative of production per capita
-
-        '''
+       
         # a. The lower bound of capital and consumption is defined as marginally above zero
         epsilon = 1e-10
 
@@ -93,19 +94,14 @@ class NumericalmodelclassOLG():
     
     def optimization_firm(self,k_t):
         
-        ''' Deriving the optimal factor prices in order to solve the firm´s optimization problem
-        
-        Args: 
+       #Deriving the optimal factor prices in order to solve the firm´s optimization problem
+            #Args: 
+            # self (setup): Parameters from the OLG class
+            #k_t (float): Capital per capita in period t
 
-            self (setup): Parameters from the OLG class
-            k_t (float): Capital per capita in period t
-
-        Returns: 
-        
-            w_t (function): Real wage
-            R_t (function): Gross real interest rate
-
-        '''
+        #Returns: 
+            #  w_t (function): Real wage
+            #R_t (function): Gross real interest rate
      
         R_t = self.y_prime(k_t)
         w_t = self.y(k_t) - self.y_prime(k_t) * k_t
@@ -116,21 +112,17 @@ class NumericalmodelclassOLG():
     
     def lifetime_utility(self, c_t, w_t, R_tnext, w_tnext,):
         
-        ''' Defining lifetime utility from consumption in period t and period t+1
+        #The lifetime utility of consumption is defined for period t and t+1
+            #Args: 
+                #self (setup): Parameters from the OLG class
+                # c_t (float): Consumption in period t
+                # w_t (float): Real wage in period t
+                # w_tnext (float): Real wage in period t+1
+                # R_tnext (float): Gross real interest rate in period t+1
+        #Returns: 
+            #u_lifetime (function): Lifetime utility
 
-        Args: 
-
-            self (setup): Parameters from the OLG class
-            c_t (float): Consumption in period t
-            w_t (float): Real wage in period t
-            w_tnext (float): Real wage in period t+1
-            R_tnext (float): Gross real interest rate in period t+1
-
-        Returns: 
-        
-            u_lifetime (function): Lifetime utility
-
-        '''
+      
         
         # a. Savings defined from the budget constraint
         saving_b = ((1 - self.tau) * w_t - c_t)
@@ -146,21 +138,18 @@ class NumericalmodelclassOLG():
     
     def household_optimization(self, w_t, R_tnext, w_tnext):
         
-        '''
-        Finding the optimal saving that maximizes life time utility of households
         
-        Args:
-
-            self (setup): Parameters from the OLG class
-            w_t (float): Real wage in period t
-            w_tnext (float): Real wage in period t+1
-            R_tnext (float): Gross real interest rate in period t+1
+        #Finding the optimal saving that maximizes life time utility of households
+            #Args:
+            #   self (setup): Parameters from the OLG class
+            # w_t (float): Real wage in period t
+            #  w_tnext (float): Real wage in period t+1
+            # R_tnext (float): Gross real interest rate in period t+1
+            
+        # Returns:
+            # s_t (function): Optimal savings in period t
         
-        Returns:
-
-            s_t (function): Optimal savings in period t
-        
-        '''
+       
         
         # a. For consumption the upper and lower bound are defined in period t
         cmax = (1 - self.tau) * w_t 
@@ -178,19 +167,15 @@ class NumericalmodelclassOLG():
         
     def equilibrium(self, k_t1, disp=0):
         
-        '''
-        Equilibrium of capital per capita is found
+      
+        #Equilibrium of capital per capita is found
+         # Args: 
+            # self (setup): Parameters from the OLG class
+            # k_tnext (float): Capital per capita in period t+1
+        # Return:
+            # k_t (function): Optimal capital per capita
         
-        Args: 
-
-            self (setup): Parameters from the OLG class
-            k_tnext (float): Capital per capita in period t+1
-            
-        Return:
-        
-            k_t (function): Optimal capital per capita
-        
-        '''
+       
         
         # a. For period t+1 the factor prices for labout and capitla are derived
         R_tnext, w_tnext = self.optimization_firm(k_t1)
@@ -223,19 +208,15 @@ class NumericalmodelclassOLG():
     
     def numericaltransition_curve(self):
         
-        '''
-        Finding optimal capital accumulation 
         
-        Args: 
-
-            self (setup): Parameters from the OLG class
+        #Finding optimal capital accumulation 
+            # Args: 
+                # self (setup): Parameters from the OLG class
+        #Return:
+            # plot_k_tnext (function): Capital in period t+1
+            # plot_k_t (function): Capital in period t
             
-        Return:
-            
-            plot_k_tnext (function): Capital in period t+1
-            plot_k_t (function): Capital in period t
-            
-        '''
+      
         
         # a. Creating an empty numpy linspace from the minimum to the maximum bound of capital per capita, representing k_t+1
         self.plot_k_t1 = np.linspace(self.kmin, self.kmax, self.kN)
@@ -253,19 +234,14 @@ class NumericalmodelclassOLG():
     
     def plot_numericaltransition_curve(self, ax, **kwargs):
        
-        '''
-        Plotting the transition curve of capital accumulation 
-        
-        Args: 
-
-            self (setup): Parameters from the OLG class
-            ax (ndarray?): Subplot axis 
+    
+        #Plotting the transition curve of capital accumulation 
+            # Args: 
+                # self (setup): Parameters from the OLG class
+                # ax (ndarray?): Subplot axis 
+            # Return:
+                #transition_curve (function): grapich presentation of optimal capital accumulation
             
-        Return:
-            
-            transition_curve (function): grapich presentation of optimal capital accumulation
-            
-        '''
         
         ax.plot(self.plot_k_t, self.plot_k_t1, **kwargs)
         
@@ -277,19 +253,15 @@ class NumericalmodelclassOLG():
         
     def plot_numerical45_curve(self, ax, **kwargs):
         
-        '''
-        Plotting the curve of the transitional diagram, where k_t+1 = k_t
         
-        Args: 
-
-            self (setup): Parameters from the OLG class
-            ax (ndarray?): Subplot axis 
-            
-        Return:
-            
-            45 (function): Linear function 
+        #For k_t+1=k_t plotting the 45 degree curve
+            # Args: 
+                #  self (setup): Parameters from the OLG class
+                # ax (ndarray?): Subplot axis 
+            # Return:
+                # 45 (function): Linear function 
         
-        '''    
+       
         
         ax.plot([self.kmin, self.kmax], [self.kmin, self.kmax], **kwargs)
         
