@@ -167,7 +167,7 @@ class NumericalmodelclassOLG():
         cmin = 0
         
         # b. Through bounded minimization for scalar products the optimal savings is found 
-        obj = lambda c_t: -self.utility_lifetime(c_t, w_t, R_tnext, w_tnext)
+        obj = lambda c_t: -self.lifetime_utility(c_t, w_t, R_tnext, w_tnext)
         c_t = optimize.fminbound(obj, cmin, cmax)
         
         # c. By the budget contraint savings is defined
@@ -238,7 +238,7 @@ class NumericalmodelclassOLG():
         '''
         
         # a. Creating an empty numpy linspace from the minimum to the maximum bound of capital per capita, representing k_t+1
-        self.plot_k_t1 = np.linspace(self.kmin, self.kmax, self.kN)
+        self.plot_k_t = np.linspace(self.kmin, self.kmax, self.kN)
         
         # b. For each value of k_t+1 loop through in order to find corresponding equilibrium value of k_t 
         
