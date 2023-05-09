@@ -176,7 +176,7 @@ class NumericalmodelclassOLG():
         return s_t
         
         
-    def equilibrium(self, k_tnext, disp=0):
+    def equilibrium(self, k_t1, disp=0):
         
         '''
         Equilibrium of capital per capita is found
@@ -193,7 +193,7 @@ class NumericalmodelclassOLG():
         '''
         
         # a. For period t+1 the factor prices for labout and capitla are derived
-        R_tnext, w_tnext = self.optimization_firm(k_tnext)
+        R_tnext, w_tnext = self.optimization_firm(k_t1)
         
         # b. Optimal savings 
         def obj(k_t):
@@ -205,7 +205,7 @@ class NumericalmodelclassOLG():
             s_t = self.household_optimization(w_t, R_tnext, w_tnext)  # 2. Optimal savings
             
             
-            dev = (k_tnext - s_t / (1 + self.n))**2  # 3. The deviation that should be minimized is defined
+            dev = (k_t1 - s_t / (1 + self.n))**2  # 3. The deviation that should be minimized is defined
             
             return dev
         
@@ -238,12 +238,12 @@ class NumericalmodelclassOLG():
         '''
         
         # a. Creating an empty numpy linspace from the minimum to the maximum bound of capital per capita, representing k_t+1
-        self.plot_k_t = np.linspace(self.kmin, self.kmax, self.kN)
+        self.plot_k_t1 = np.linspace(self.kmin, self.kmax, self.kN)
         
         # b. For each value of k_t+1 loop through in order to find corresponding equilibrium value of k_t 
         
        
-        self.plot_k_t1 = np.empty(self.kN)   # 1. Finding the steady state value capital when k_t is appriximately close to k_t+1
+        self.plot_k_t = np.empty(self.kN)   # 1. Finding the steady state value capital when k_t is appriximately close to k_t+1
         for i, k_t1 in enumerate(self.plot_k_t1):
             k_t = self.equilibrium(k_t1)
             self.plot_k_t1[i] = k_t
