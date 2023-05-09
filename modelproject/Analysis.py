@@ -180,10 +180,10 @@ class AnalysismodelclassOLG():
         
         # a. The steady state is substituted in    
         k_star0 = (a * b * par.A )** par.c
-        k_star1 = ((k_star0.subs(par.a , a)).subs(par.b ,b)).subs(par.c,c)
-        k_star = sm.Eq(par.kss, k_star1)
+        k_star1 = ((k_star0.subs(par.a , a)).subs(par.b ,b)).subs(par.c,c) #Finds the value of the steady state
+        k_star = sm.Eq(par.kss, k_star1) #Shows the equation steady state is
         
-        print('The steady state is found to be')
+        print('The steady state is found to be:')
         display(k_star)
         
         return k_star1
