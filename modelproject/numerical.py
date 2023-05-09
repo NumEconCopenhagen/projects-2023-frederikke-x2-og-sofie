@@ -91,9 +91,9 @@ class NumericalmodelclassOLG():
         self.y_prime = lambda k_t: self.alpha * self.A * np.fmax(k_t,epsilon)**(self.alpha-1)
     
     
-    def firm_optimization(self,k_t):
+    def optimization_firm(self,k_t):
         
-        ''' Solving the firm's optimization problem by deriving optimal factor prices
+        ''' Deriving the optimal factor prices in order to solve the firm´s optimization problem
         
         Args: 
 
@@ -114,7 +114,7 @@ class NumericalmodelclassOLG():
         
     
     
-    def utility_lifetime(self, c_t, w_t, R_tnext, w_tnext,):
+    def lifetime_utility(self, c_t, w_t, R_tnext, w_tnext,):
         
         ''' Defining lifetime utility from consumption in period t and period t+1
 
@@ -132,13 +132,13 @@ class NumericalmodelclassOLG():
 
         '''
         
-        # a. Savings as defined from budget constraint
+        # a. Savings defined from the budget constraint
         saving_b = ((1 - self.tau) * w_t - c_t)
         
-        # b. Consumption in period t+1 as defined from budget constraints
+        # b. In period t+1 consumption is defined from the budget constraint
         c_tnext = saving_b * R_tnext + (1 + self.n) * self.tau * w_tnext
         
-        # c. Lifetime utility from consumption when young and old, respectively
+        # c. Lifetime utility when young and old from consumption, respectively
         u_lifetime = self.u(c_t) + (1 / (1 + self.rho)) * self.u(c_tnext)
         
         return u_lifetime
@@ -162,15 +162,15 @@ class NumericalmodelclassOLG():
         
         '''
         
-        # a. Defining upper and lower bounds for consumption in period t
+        # a. For consumption the upper and lower bound are defined in period t
         cmax = (1 - self.tau) * w_t 
         cmin = 0
         
-        # b. Optimal savings is found through bounded minimization for scalar products 
+        # b. Through bounded minimization for scalar products the optimal savings is found 
         obj = lambda c_t: -self.utility_lifetime(c_t, w_t, R_tnext, w_tnext)
         c_t = optimize.fminbound(obj, cmin, cmax)
         
-        # c. Savings as defined by the budget constraint
+        # c. By the budget contraint savings is defined
         s_t = (1 - self.tau) * w_t - c_t
         
         return s_t
@@ -179,7 +179,7 @@ class NumericalmodelclassOLG():
     def equilibrium(self, k_tnext, disp=0):
         
         '''
-        Finding equilibrium of capital per capita
+        Equilibrium of capital per capita is found
         
         Args: 
 
@@ -192,36 +192,36 @@ class NumericalmodelclassOLG():
         
         '''
         
-        # a. Factor prices for labour and capital are derived for period t+1
-        R_tnext, w_tnext = self.firm_optimization(k_tnext)
+        # a. For period t+1 the factor prices for labout and capitla are derived
+        R_tnext, w_tnext = self.optimization_firm(k_tnext)
         
         # b. Optimal savings 
         def obj(k_t):
             
-            # i. Factor price of labour is derived for period t
-            _R_t, w_t = self.firm_optimization(k_t)
             
-            # ii. Optimal savings
-            s_t = self.household_optimization(w_t, R_tnext, w_tnext)
+            _R_t, w_t = self.optimization_firm(k_t)  # 1. For period t the factor price of labout is derived
             
-            # iii. Define the deviation that should be minimized
-            dev = (k_tnext - s_t / (1 + self.n))**2
+            
+            s_t = self.household_optimization(w_t, R_tnext, w_tnext)  # 2. Optimal savings
+            
+            
+            dev = (k_tnext - s_t / (1 + self.n))**2  # 3. The deviation that should be minimized is defined
             
             return dev
         
-        # c. Defining upper and lower bound for capital
+        # c. Upper and lower bound for capital is defined
         kmin = 0
         kmax = self.kmax
         
         
-        # d. Optimal level of capital per capita is found through bounded minimization for scalar products     
+        # d. Through bounded minimization for scalar products the optimal level of capital per capita is found     
         k_t = optimize.fminbound(obj, kmin, kmax, disp=disp)
         
         
         return k_t
     
     
-    def transition_curve(self):
+    def numericaltransition_curve(self):
         
         '''
         Finding optimal capital accumulation 
@@ -237,21 +237,21 @@ class NumericalmodelclassOLG():
             
         '''
         
-        # a. Create empty numpy linspace from the minimum to the maximum bound of capital per capita, representing k_t+1
-        self.plot_k_tnext = np.linspace(self.kmin, self.kmax, self.kN)
+        # a. Creating an empty numpy linspace from the minimum to the maximum bound of capital per capita, representing k_t+1
+        self.plot_k_t1 = np.linspace(self.kmin, self.kmax, self.kN)
         
-        # b. Loop through each value of k_t+1 to find the corresponding equilibrium value of k_t
+        # b. For each value of k_t+1 loop through in order to find corresponding equilibrium value of k_t 
         
-        # ii. The steady state value of capital is found when k_t is appriximately close to k_t+1
-        self.plot_k_t = np.empty(self.kN)
-        for i, k_tnext in enumerate(self.plot_k_tnext):
-            k_t = self.equilibrium(k_tnext)
-            self.plot_k_t[i] = k_t
-            if (np.abs(k_tnext - k_t) < 0.01 and k_t > 0.01 and k_t < 19):
+       
+        self.plot_k_t1 = np.empty(self.kN)   # 1. Finding the steady state value capital when k_t is appriximately close to k_t+1
+        for i, k_t1 in enumerate(self.plot_k_t1):
+            k_t = self.equilibrium(k_t1)
+            self.plot_k_t1[i] = k_t
+            if (np.abs(k_t1 - k_t) < 0.01 and k_t > 0.01 and k_t < 19):
                 self.ss = k_t 
             
     
-    def plot_transition_curve(self, ax, **kwargs):
+    def plot_numericaltransition_curve(self, ax, **kwargs):
        
         '''
         Plotting the transition curve of capital accumulation 
@@ -267,7 +267,7 @@ class NumericalmodelclassOLG():
             
         '''
         
-        ax.plot(self.plot_k_t, self.plot_k_tnext, **kwargs)
+        ax.plot(self.plot_k_t, self.plot_k_t1, **kwargs)
         
         ax.set_xlabel("$k_t$")
         ax.set_ylabel("$k_t+1$")
@@ -275,7 +275,7 @@ class NumericalmodelclassOLG():
         ax.set_ylim(0,self.kmax)
         
         
-    def plot_45_curve(self, ax, **kwargs):
+    def plot_numerical45_curve(self, ax, **kwargs):
         
         '''
         Plotting the curve of the transitional diagram, where k_t+1 = k_t
