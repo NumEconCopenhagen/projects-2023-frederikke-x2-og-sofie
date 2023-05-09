@@ -99,7 +99,7 @@ class AnalysismodelclassOLG():
         return RHS - LHS
            
     
-    def euler(self):
+    def eulereq(self):
         par = self.par
         # The equations used to find the Euler equation is found
         # self refers to the variables and paremeters from the "setup(self)"
@@ -118,7 +118,7 @@ class AnalysismodelclassOLG():
         return sm.Eq(euler_1, par.cy1t)
     
     
-    def optimalsavings(self):
+    def optimalsave(self):
         par = self.par
         # The equations used to find the optimal saving is defined
         # self refers to the variables and paremeters from the "setup(self)"
@@ -130,7 +130,7 @@ class AnalysismodelclassOLG():
         bc_t2 = par.s_t * (1 + par.r_t1)+ (1 + par.n) * d_t1 # 3. Defining the budget constraint when old
 
         # 4. The budget constraints are substituted into the Euler equation
-        eul = self.euler() 
+        eul = self.eulereq() 
         sav = (eul.subs(par.cy1t , bc_t1)).subs(par.co2t , bc_t2)
                 
         # d. The exprestions are being simplified
@@ -142,7 +142,7 @@ class AnalysismodelclassOLG():
        
 
     
-    def capitalaccumulation(self):
+    def capitalacc(self):
         par = self.par
 
         # The equations used to find the caital accumulation is defined
@@ -166,7 +166,7 @@ class AnalysismodelclassOLG():
         
         
         
-    def steadystate_capital(self):
+    def cap_steadystate(self):
         par = self.par
 
         # The equations used to find the steady sate for caital is defined
