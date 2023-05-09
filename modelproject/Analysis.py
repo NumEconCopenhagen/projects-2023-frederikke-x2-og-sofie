@@ -110,13 +110,10 @@ class AnalysismodelclassOLG():
         foc1 = sm.Eq(0, sm.diff(lagrange, par.cy1t)) # 1. The firs order condition wrt the consumption when young
         foc2 = sm.Eq(0, sm.diff(lagrange, par.co2t)) # 2. The firs order condition wrt the consumption when old
         
-        # c. Solving for lambda for the two FOC
-        lamb_1 = sm.solve(foc1, par.lamb)[0]
-        lamb_2 = sm.solve(foc2, par.lamb)[0]
+        lamb_1 = sm.solve(foc1, par.lamb)[0] # 3. The lambda is solved for in the FOC, when young
+        lamb_2 = sm.solve(foc2, par.lamb)[0] # 4. The lambda is solved for in the FOC, when old
         
-        
-        # d. Define Euler
-        euler_1 = sm.solve(sm.Eq(lamb_1,lamb_2), par.cy1t)[0]
+        euler_1 = sm.solve(sm.Eq(lamb_1,lamb_2), par.cy1t)[0] # 5. The Euler equation is defined 
 
         # e. Return Euler equation
         return sm.Eq(euler_1, par.cy1t)
