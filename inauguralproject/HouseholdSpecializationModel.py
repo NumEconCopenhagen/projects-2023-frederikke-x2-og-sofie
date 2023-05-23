@@ -27,13 +27,12 @@ class HouseholdSpecializationModelClass:
         par.nu = 0.001
         par.epsilon = 1.0
         par.omega = 0.5 
-        par.new_nu = 0.0001
 
         # c. household production
         par.alpha = 0.5
         par.sigma = 1.0
 
-        # d. wages
+        # d. wFages
         par.wM = 1.0
         par.wF = 1.0
         par.wF_vec = np.linspace(0.8,1.2,5)
@@ -178,9 +177,9 @@ class HouseholdSpecializationModelClass:
         A = np.vstack([np.ones(x.size),x]).T
         sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)[0]
     
-class NewModel:
+class NewModelQ5:
     def __init__(self):
-        """ setup model """
+        """ The model is setup as the same way for question 1-4, but here child care is added"""
         
         # a. create namespaces
         par = self.par = SimpleNamespace()
@@ -233,18 +232,20 @@ class NewModel:
         C = par.wM * LM + par.wF * LF
 
         # b. home production
-        if par.sigma == 1.0:
-            H = HM ** (1 - par.alpha) * HF ** par.alpha
-        elif par.sigma == 0:
-            H = np.minimum(HM, HF)
-        else:
-            with np.errstate(all='ignore'):
-                H = ((1 - par.alpha) * HM ** ((par.sigma - 1) / par.sigma) + par.alpha * HF ** ((par.sigma - 1) / par.sigma)) ** (par.sigma / (par.sigma - 1))
-
-        # c. child care
+        if par.sigma == 0 :
+           H = np.min(HM,HF)
+        elif par.sigma==1:
+            H = HM**(1-par.alpha)*HF**par.alpha
+        else :
+           HM = np.fmax(HM, 1e-07)
+           HF = np.fmax(HF, 1e-07)
+           inner = ((1-par.alpha)*HM**((par.sigma-1)/par.sigma)+par.alpha*HF**((par.sigma-1)/par.sigma))
+           H = np.fmax(inner, 1e-07)**(par.sigma/(par.sigma-1))
+       
+        # c. Child care is added 
         child_care = N ** par.gamma
 
-        # d. total consumption utility
+        # d. total consumption utility with childcare
         Q = C ** par.omega * H ** (1 - par.omega) * child_care ** par.delta
         utility = np.fmax(Q, 1e-8) ** (1 - par.rho) / (1 - par.rho)
 
@@ -267,16 +268,16 @@ class NewModel:
         x = np.linspace(0,24,49)
         LM,HM,LF,HF = np.meshgrid(x,x,x,x) # all combinations
     
-        LM = LM.ravel() # vector
+        LM = LM.ravel() 
         HM = HM.ravel()
         LF = LF.ravel()
         HF = HF.ravel()
 
-        # b. calculate utility
+        # b. calculate utility with child care as an additional variable
         u = self.calc_utility(LM,HM,LF,HF,par.N)
     
         # c. set to minus infinity if constraint is broken
-        I = (LM+HM > 24) | (LF+HF > 24) # | is "or"
+        I = (LM+HM > 24) | (LF+HF > 24) 
         u[I] = -np.inf
     
         # d. find maximizing argument
@@ -301,37 +302,38 @@ class NewModel:
         sol = self.sol
         opt = SimpleNamespace()
 
-        # Define the objective function to be maximized
+        # Define the objective function to be maximized with child care, with a solution method
         def objective(x):
             LM, HM, LF, HF = x
             return -self.calc_utility(LM, HM, LF, HF, par.N)
     
-        # Define the constraints
+        # The constraints are defined
         def constraint(x):
             LM, HM, LF, HF = x
             return np.array([24 - (LM + HM), 24 - (LF + HF)])
     
         # Set the initial guess
-        x0 = np.array([12, 12, 12, 12])
+        x0 = np.array([11, 11, 11, 11])
         
-        # Use the minimize function to maximize the utility subject to the constraints
+        # An optimize minimize function is used to max the utility with the constriant
         res = optimize.minimize(objective, x0, method='trust-constr', constraints={'type': 'ineq', 'fun': constraint})
         
-        # Get the maximizing argument
+        # The objects being max
         LM, HM, LF, HF = res.x
         
-        # Save the solution
+        # The solution is saved
         sol.LM = LM
         sol.HM = HM
         sol.LF = LF
         sol.HF = HF
         
-        # Print the solution
+        # The solution is printed
         if do_print:
             for k,v in sol.__dict__.items():
                 print(f'{k} = {v:6.4f}')
 
         return sol
+      
 
     def solve_wF_vec(self, discrete=False):
         """ solve model for vector of female wages """
