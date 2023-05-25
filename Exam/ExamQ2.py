@@ -2,7 +2,7 @@ import sympy as sp
 import numpy as np
 from scipy.optimize import minimize_scalar
 
-class HairSalon:
+class HairSalonQ1:
     def __init__(self, kappa, eta, w):
         self.kappa = sp.Symbol('kappa')
         self.eta = sp.Symbol('eta')
@@ -19,7 +19,7 @@ class HairSalon:
 
 #question 2 
 
-class HairSalonH:
+class HairSalonQ2:
     def __init__(self, rho, eta, wage, iota, sigma_epsilon, R):
         self.rho = rho
         self.eta = eta
@@ -61,7 +61,7 @@ class HairSalonH:
     
 #question 3
 
-class HairSalon3:
+class HairSalonQ3:
     def __init__(self, rho, eta, wage, iota, sigma_epsilon, R, delta):
         self.rho = rho
         self.eta = eta
@@ -109,9 +109,7 @@ class HairSalon3:
 
 #Question 4
 
-
-
-class HairSalonoptimal:
+class HairSalonoptimalQ4:
     def __init__(self, rho, eta, wage, iota, sigma_epsilon, R):
         self.rho = rho
         self.eta = eta
@@ -161,7 +159,7 @@ class HairSalonoptimal:
 
 #Question 5
 
-class HairSalonDynamic:
+class HairSalonDynamicQ5:
     def __init__(self, base_price):
         self.base_price = base_price
 
@@ -176,7 +174,7 @@ class HairSalonDynamic:
 
         return dynamic_price
 
-class DemandData:
+class DemandDataQ5:
     def __init__(self, num_periods, rho, sigma_epsilon):
         self.num_periods = num_periods
         self.rho = rho
@@ -192,23 +190,4 @@ class DemandData:
 
         return epsilon_series
 
-# Function to calculate H
-def calculate_H(salon, demand_data):
-    R = (1 + 0.01) ** (1/12)
-    K = 1000  # Number of random shock series
 
-    total_h = 0.0
-    for k in range(K):
-        h = 0.0
-        epsilon_series = demand_data.generate_epsilon_series()  # Generate random shock series
-        for t in range(len(epsilon_series)):
-            demand_level = epsilon_series[t]
-            dynamic_price = salon.calculate_dynamic_price(demand_level)
-
-            # Update h using the dynamic price and other relevant variables
-            h += R ** (-t) * dynamic_price
-
-        total_h += h
-
-    H = total_h / K
-    return H
