@@ -213,74 +213,41 @@ class LaborSupplyGraphQ5:
         plt.show()
 
 class LaborSupplyGraphQ6:
-    def __init__(self, alpha, kappa, nu):
+    def __init__(self, alpha, kappa, nu, sigma, rho, epsilon):
         self.alpha = alpha
         self.kappa = kappa
         self.nu = nu
+        self.sigma = sigma
+        self.rho = rho
+        self.epsilon = epsilon
 
-    def optimal_labor_supply(self, w, tau):
-        tilde_w = (1 - tau) * w
-        discriminant = self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2
+    def utility(self, C, G):
+        return (((self.alpha * C**((self.sigma - 1) / self.sigma) + (1 - self.alpha) * G**((self.sigma - 1) / self.sigma))**(self.sigma / (1 - self.sigma)))**(1 - self.rho) - 1) / (1 - self.rho) - self.nu * (C**self.epsilon) / (1 + self.epsilon)
 
-        if discriminant < 0:
-            return -float('inf')
-
-        return (-self.kappa + np.sqrt(discriminant)) / (2 * tilde_w)
-
-
-    def government_spending(self, w, tau, L):
-        return tau * w * L
-
-    def worker_utility(self, w, tau, L):
-        tilde_w = (1 - tau) * w
-        C = self.kappa + (1 - tau) * w * L
-
-        if L <= 0 or C <= 0:
-            return float('-inf')
-
-        return np.log(C**self.alpha * (tau * w * L)**(1 - self.alpha)) - self.nu * L**2 / 2
-
-    def maximize_utility(self, w, tau_range):
-        max_utility = float('-inf')
-        optimal_tau = None
-
-        for tau in tau_range:
-            L = self.optimal_labor_supply(w, tau)
-            utility = self.worker_utility(w, tau, L)
-
-            if utility > max_utility:
-                max_utility = utility
-                optimal_tau = tau
-
-        return optimal_tau, max_utility
-
-    def plot_optimal_tax_rate(self, w, tau_range):
-        optimal_tau, max_utility = self.maximize_utility(w, tau_range)
-
-        utility_values = []
-        for tau in tau_range:
-            L = self.optimal_labor_supply(w, tau)
-            utility = self.worker_utility(w, tau, L)
-            utility_values.append(utility)
-
-        plt.plot(tau_range, utility_values)
-        plt.xlabel('Tax Rate (tau)')
-        plt.ylabel('Worker Utility')
-        plt.title('Worker Utility vs. Tax Rate')
-        plt.axvline(x=optimal_tau, color='r', linestyle='--', label='Optimal Tax Rate')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
-
-        print(f"The socially optimal tax rate maximizing worker utility: tau* = {optimal_tau}")
-        print(f"The maximum worker utility: U* = {max_utility}")
+    def consumption(self, w, tau, L):
+        return self.kappa + (1 - tau) * w * L
 
     def solve_worker_problem(self, w, tau, G):
-        objective = lambda L: abs(G - tau * w * L * ((1 - tau) * w * L) ** ((self.sigma - 1) / self.sigma))
-        result = minimize_scalar(objective, bounds=(0, 24), method='bounded')
+        objective = lambda L: abs(self.utility(self.consumption(w, tau, L), G))
+        result = optimize.minimize_scalar(objective, bounds=(0, 24), method='bounded')
         return result.x
 
     def solve_optimal_G(self, w, tau):
-        L_star = self.solve_worker_problem(w, tau, tau * w * self.solve_worker_problem(w, tau, 24))
-        G = tau * w * L_star * ((1 - tau) * w * L_star) ** ((self.sigma - 1) / self.sigma)
-        return G
+        def objective(G):
+            L = self.solve_worker_problem(w, tau, G)
+            C = self.consumption(w, tau, L)
+            return G - tau * w * L * ((1 - tau) * w * L)**((self.sigma - 1) / self.sigma)
+
+        result = optimize.root_scalar(objective, method='brentq', bracket=(0, 100))
+        return result.root
+
+    def plot_optimal_G(self, w, tau_range):
+        optimal_G = [self.solve_optimal_G(w, tau) for tau in tau_range]
+
+        plt.plot(tau_range, optimal_G)
+        plt.xlabel('Tax Rate (tau)')
+        plt.ylabel('Optimal G')
+        plt.title('Optimal G vs. Tax Rate')
+        plt.grid(True)
+        plt.show()
+
