@@ -42,7 +42,7 @@ class GriewankOptimizer:
             if k == 0 or self.griewank(x_ast) < self.griewank(self.x_star):
                 self.x_star = x_ast          #Update x_star if a better solution is found
 
-            self.history.append(x_ast)   #We store the optimization trajectory
+            self.history.append(x_ast)   #We store the optimization curve
 
             if self.griewank(self.x_star) < self.tolerance:
                 break   #We now set a condition so to stop iterating if the tolerance condition is met
