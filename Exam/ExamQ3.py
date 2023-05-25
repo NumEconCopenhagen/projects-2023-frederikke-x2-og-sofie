@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+from mpl_toolkits.mplot3d import Axes3D
 
 class GriewankOptimizer:
     def __init__(self, bounds, tolerance, warmup_iters, max_iters):
@@ -33,7 +34,8 @@ class GriewankOptimizer:
             x = np.random.uniform(self.bounds[0], self.bounds[1], size=2) #generates a randome point within the bounds via a 
             #uniform function
 
-            if k >= self.warmup_iters: #conditional statement for k. If 
+            if k >= self.warmup_iters: #conditional statement for k. If k is greater or equal to warmup_iters the chi value 
+                #will be calculated, based on k iterations. This adjustment is to 
                 chi = 0.50 * 2 / (1 + np.exp((k - self.warmup_iters) / 100)) #We adjust the input using after warm-up period
                 x_k0 = chi * x + (1 - chi) * self.x_star
                 x_ast = self.run_optimizer(x_k0)
@@ -48,7 +50,7 @@ class GriewankOptimizer:
             if self.griewank(self.x_star) < self.tolerance:
                 break   #We now set a condition so to stop iterating if the tolerance condition is met
 
-    def plot_initial_guesses(self):
+    def plot_initial_guesses_2d(self):
         #We now visualize the optimization process by plotting initial guesses
         history = np.array(self.history)
         plt.scatter(history[:, 0], history[:, 1], c='b', label='Effective Initial Guesses')
@@ -57,4 +59,19 @@ class GriewankOptimizer:
         plt.ylabel('x2')
         plt.title('Effective Initial Guesses')
         plt.legend()
+        plt.show()
+
+    def plot_initial_guesses_3d(self):
+
+        # We now visualize the optimization process by plotting initial guesses
+        history = np.array(self.history)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(history[:, 0], history[:, 1], self.griewank_(history[:, 0], history[:, 1]), c='b', label='Effective Initial Guesses')
+        ax.scatter(self.x_star[0], self.x_star[1], self.griewank_(self.x_star[0], self.x_star[1]), c='r', label='Global Minimum')
+        ax.set_xlabel('x1')
+        ax.set_ylabel('x2')
+        ax.set_zlabel('Griewank Value')
+        ax.set_title('Effective Initial Guesses')
+        ax.legend()
         plt.show()
