@@ -63,4 +63,49 @@ class LaborSupplyGraph:
         plt.legend()
         plt.grid(True)
         plt.show()
-   
+
+class LaborSupplyGraphQ3:
+    def __init__(self, alpha, kappa, nu):
+        self.alpha = alpha
+        self.kappa = kappa
+        self.nu = nu
+
+    def optimal_labor_supply(self, w, tau):
+        tilde_w = (1 - tau) * w
+        return (-self.kappa + np.sqrt(self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2)) / (2 * tilde_w)
+
+    def government_spending(self, w, tau, L):
+        return tau * w * L
+
+    def worker_utility(self, w, tau, L):
+        tilde_w = (1 - tau) * w
+        C = self.kappa + (1 - tau) * w * L
+        return np.log(C**self.alpha * (tau * w * L)**(1 - self.alpha)) - self.nu * L**2 / 2
+
+    def plot_implied_values(self, w, tau_values):
+        L_values = self.optimal_labor_supply(w, tau_values)
+        G_values = self.government_spending(w, tau_values, L_values)
+        utility_values = self.worker_utility(w, tau_values, L_values)
+
+        plt.figure(figsize=(12, 4))
+
+        plt.subplot(1, 3, 1)
+        plt.plot(tau_values, L_values)
+        plt.xlabel('Tax Rate (tau)')
+        plt.ylabel('Labor Supply (L)')
+        plt.title('Labor Supply vs. Tax Rate')
+
+        plt.subplot(1, 3, 2)
+        plt.plot(tau_values, G_values)
+        plt.xlabel('Tax Rate (tau)')
+        plt.ylabel('Government Spending (G)')
+        plt.title('Government Spending vs. Tax Rate')
+
+        plt.subplot(1, 3, 3)
+        plt.plot(tau_values, utility_values)
+        plt.xlabel('Tax Rate (tau)')
+        plt.ylabel('Worker Utility')
+        plt.title('Worker Utility vs. Tax Rate')
+
+        plt.tight_layout()
+        plt.show()
