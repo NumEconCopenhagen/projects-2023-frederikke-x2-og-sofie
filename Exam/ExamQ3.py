@@ -29,10 +29,11 @@ class GriewankOptimizer:
 
     def optimize(self):
         #We now use a loop for the optimization
-        for k in range(self.max_iters):
-            x = np.random.uniform(self.bounds[0], self.bounds[1], size=2)
+        for k in range(self.max_iters): #iterates over a determined number for the optimization process.
+            x = np.random.uniform(self.bounds[0], self.bounds[1], size=2) #generates a randome point within the bounds via a 
+            #uniform function
 
-            if k >= self.warmup_iters:
+            if k >= self.warmup_iters: #conditional statement for k. If 
                 chi = 0.50 * 2 / (1 + np.exp((k - self.warmup_iters) / 100)) #We adjust the input using after warm-up period
                 x_k0 = chi * x + (1 - chi) * self.x_star
                 x_ast = self.run_optimizer(x_k0)
