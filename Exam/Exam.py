@@ -118,7 +118,13 @@ class LaborSupplyGraphQ4:
 
     def optimal_labor_supply(self, w, tau):
         tilde_w = (1 - tau) * w
-        return (-self.kappa + np.sqrt(self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2)) / (2 * tilde_w)
+        
+        discriminant = self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2
+
+        if discriminant < 0:
+            return -float('inf')
+
+        return (-self.kappa + np.sqrt(discriminant)) / (2 * tilde_w)
 
     def government_spending(self, w, tau, L):
         return tau * w * L
@@ -126,6 +132,10 @@ class LaborSupplyGraphQ4:
     def worker_utility(self, w, tau, L):
         tilde_w = (1 - tau) * w
         C = self.kappa + (1 - tau) * w * L
+
+        if L <= 0 or C <= 0:
+            return float('-inf')
+
         return np.log(C**self.alpha * (tau * w * L)**(1 - self.alpha)) - self.nu * L**2 / 2
 
     def maximize_utility(self, w, tau_range):
