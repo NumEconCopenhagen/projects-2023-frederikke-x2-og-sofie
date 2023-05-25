@@ -5,7 +5,6 @@ from scipy.optimize import fsolve
 from scipy.optimize import minimize_scalar
 from scipy import optimize
 
-
 class LaborSupplyModel:
     def __init__(self):
         # Declare the symbolic variables
@@ -126,13 +125,6 @@ class LaborSupplyGraphQ3:
 
         plt.tight_layout()
         plt.show()
-
-import sympy as sp
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import fsolve
-from scipy.optimize import minimize_scalar
-from scipy import optimize
 
 class LaborSupplyGraphQ4:
     def __init__(self, alpha, kappa, nu):
