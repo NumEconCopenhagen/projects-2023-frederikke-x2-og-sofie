@@ -157,3 +157,58 @@ class HairSalonoptimal:
             h_values.append(h_value)
 
         return -np.mean(h_values)  # Negate to maximize the objective function
+    
+
+#Question 5
+
+class HairSalonDynamic:
+    def __init__(self, base_price):
+        self.base_price = base_price
+
+    def calculate_dynamic_price(self, demand_level):
+        # Implement your dynamic pricing algorithm here
+        # Use the demand level to adjust the base price
+        # You can consider other factors like time of year, hairdresser availability, etc.
+        # Return the dynamically adjusted price
+
+        # Example: Adjust the base price based on the demand level
+        dynamic_price = self.base_price * (1 + demand_level)  # Adjust the price based on demand level
+
+        return dynamic_price
+
+class DemandData:
+    def __init__(self, num_periods, rho, sigma_epsilon):
+        self.num_periods = num_periods
+        self.rho = rho
+        self.sigma_epsilon = sigma_epsilon
+
+    def generate_epsilon_series(self):
+        epsilon_series = []
+        epsilon_t = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon)
+
+        for _ in range(self.num_periods):
+            epsilon_series.append(epsilon_t)
+            epsilon_t = self.rho * epsilon_t + np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon)
+
+        return epsilon_series
+
+# Function to calculate H
+def calculate_H(salon, demand_data):
+    R = (1 + 0.01) ** (1/12)
+    K = 1000  # Number of random shock series
+
+    total_h = 0.0
+    for k in range(K):
+        h = 0.0
+        epsilon_series = demand_data.generate_epsilon_series()  # Generate random shock series
+        for t in range(len(epsilon_series)):
+            demand_level = epsilon_series[t]
+            dynamic_price = salon.calculate_dynamic_price(demand_level)
+
+            # Update h using the dynamic price and other relevant variables
+            h += R ** (-t) * dynamic_price
+
+        total_h += h
+
+    H = total_h / K
+    return H
