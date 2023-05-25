@@ -73,8 +73,12 @@ class HouseholdSpecializationModelClass:
 
         # c. total consumption utility
         Q = C**par.omega*H**(1-par.omega)
-        utility = np.fmax(Q, 1e-08)**(1-par.rho)/(1-par.rho)
 
+        if par.rho != 1:
+            utility = np.where(Q >= 1e-08, Q ** (1 - par.rho) / (1 - par.rho), 1e-08 ** (1 - par.rho) / (1 - par.rho))
+        else:
+            utility = np.where(Q >= 1e-08, np.log(Q), np.log(1e-08))
+    
         # d. disutlity of work
         epsilon_ = 1+1/par.epsilon
         TM = LM+HM
