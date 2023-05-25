@@ -1,17 +1,14 @@
 
 from types import SimpleNamespace
-
 import numpy as np
 from scipy import optimize
 from tabulate import tabulate
-
-import pandas as pd 
+import pandas as pd
 import matplotlib.pyplot as plt
-
 from scipy.optimize import minimize
 from sklearn.linear_model import LinearRegression
-
 import types
+from scipy.optimize import curve_fit
 
 class HouseholdSpecializationModelClass:
 
@@ -62,23 +59,22 @@ class HouseholdSpecializationModelClass:
         # b. home production
         # splitting the function
         if par.sigma == 0 :
-           H = np.min(HM,HF)
+           H = np.minimum(HM,HF)
         elif par.sigma==1:
             H = HM**(1-par.alpha)*HF**par.alpha
         else :
            HM = np.fmax(HM, 1e-07)
            HF = np.fmax(HF, 1e-07)
-           inner = ((1-par.alpha)*HM**((par.sigma-1)/par.sigma)+par.alpha*HF**((par.sigma-1)/par.sigma))
+           inner = (1-par.alpha)*HM**((par.sigma-1)/par.sigma)+par.alpha*HF**((par.sigma-1)/par.sigma)
            H = np.fmax(inner, 1e-07)**(par.sigma/(par.sigma-1))
 
         # c. total consumption utility
         Q = C**par.omega*H**(1-par.omega)
+        utility = np.fmax(Q, 1e-08)**(1-par.rho)/(1-par.rho)
+             # Check for invalid values
+        if np.any(np.isinf(C)) or np.any(np.isnan(C)) or np.any(np.isinf(H)) or np.any(np.isnan(H)) or np.any(np.isinf(Q)) or np.any(np.isnan(Q)):
+            return -np.inf
 
-        if par.rho != 1:
-            utility = np.where(Q >= 1e-08, Q ** (1 - par.rho) / (1 - par.rho), 1e-08 ** (1 - par.rho) / (1 - par.rho))
-        else:
-            utility = np.where(Q >= 1e-08, np.log(Q), np.log(1e-08))
-    
         # d. disutlity of work
         epsilon_ = 1+1/par.epsilon
         TM = LM+HM
@@ -105,12 +101,19 @@ class HouseholdSpecializationModelClass:
 
         # b. calculate utility
         u = self.calc_utility(LM,HM,LF,HF)
-    
+            
+        # Set invalid values to -np.inf
+        u[np.logical_or.reduce([np.isinf(u), np.isnan(u)])] = -np.inf
+
         # c. set to minus infinity if constraint is broken
         I = (LM+HM > 24) | (LF+HF > 24) # | is "or"
         u[I] = -np.inf
+
+        # d. check if all utility values are -inf
+        if np.all(u == -np.inf):
+            return None  # No feasible solution
     
-        # d. find maximizing argument
+        # e. find maximizing argument
         j = np.argmax(u)
         
         opt.LM = LM[j]
@@ -122,6 +125,7 @@ class HouseholdSpecializationModelClass:
         if do_print:
             for k,v in opt.__dict__.items():
                 print(f'{k} = {v:6.4f}')
+
 
         return opt
 
@@ -178,8 +182,26 @@ class HouseholdSpecializationModelClass:
 
         x = np.log(par.wF_vec)
         y = np.log(sol.HF_vec/sol.HM_vec)
-        A = np.vstack([np.ones(x.size),x]).T
-        sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)[0]
+
+        # Filter out infinite or NaN values
+        mask = np.isfinite(x) & np.isfinite(y)
+        x_filtered = x[mask]
+        y_filtered = y[mask]
+
+        if x_filtered.size == 0 or y_filtered.size == 0:
+        # No valid data points for regression
+            sol.beta0 = np.nan
+            sol.beta1 = np.nan
+            return
+       # Define the linear function to fit
+        def linear_func(x, beta0, beta1):
+            return beta0 + beta1 * x
+
+        # Perform the curve fitting
+        popt, pcov = curve_fit(linear_func, x, y)
+
+        sol.beta0, sol.beta1 = popt
+
     
 class NewModelQ5:
     def __init__(self):
@@ -187,7 +209,6 @@ class NewModelQ5:
         
         # a. create namespaces
         par = self.par = SimpleNamespace()
-
         sol = self.sol = SimpleNamespace()
 
         # b. preferences
@@ -272,7 +293,7 @@ class NewModelQ5:
         x = np.linspace(0,24,49)
         LM,HM,LF,HF = np.meshgrid(x,x,x,x) # all combinations
     
-        LM = LM.ravel() 
+        LM = LM.ravel()#vector 
         HM = HM.ravel()
         LF = LF.ravel()
         HF = HF.ravel()
@@ -299,125 +320,60 @@ class NewModelQ5:
 
         return opt
     
-    def solve(self, do_print=False):
+    def solve_count(self):
         """ solve model continuously """
         
         par = self.par
         sol = self.sol
         opt = SimpleNamespace()
 
-        # Define the objective function to be maximized with child care, with a solution method
-        def objective(x):
-            LM, HM, LF, HF = x
-            return -self.calc_utility(LM, HM, LF, HF, par.N)
-    
-        # The constraints are defined
-        def constraint(x):
-            LM, HM, LF, HF = x
-            return np.array([24 - (LM + HM), 24 - (LF + HF)])
-    
-        # Set the initial guess
-        x0 = np.array([11, 11, 11, 11])
-        
-        # An optimize minimize function is used to max the utility with the constriant
-        res = optimize.minimize(objective, x0, method='trust-constr', constraints={'type': 'ineq', 'fun': constraint})
-        
-        # The objects being max
-        LM, HM, LF, HF = res.x
-        
-        # The solution is saved
-        sol.LM = LM
-        sol.HM = HM
-        sol.LF = LF
-        sol.HF = HF
-        
-        # The solution is printed
-        if do_print:
-            for k,v in sol.__dict__.items():
-                print(f'{k} = {v:6.4f}')
+        # Using the optimizer function to minimize the utility function
+        initial_guess = [11, 11, 11, 11, 0]  # Our guess (including childcare time)
 
-        return sol
-      
+        # Utility function with childcare variable
+        objective_function = lambda x: -self.calc_utility(x[0], x[1], x[2], x[3], x[4])  # Using the utility function of LM, HM, LF, HF, C
+
+        # Constraints
+        constraint1 = {'type': 'ineq', 'fun': lambda x: 24 - x[0] - x[1]}  # Constraint for male
+        constraint2 = {'type': 'ineq', 'fun': lambda x: 24 - x[2] - x[3]}  # Constraint for female
+        constraint3 = {'type': 'ineq', 'fun': lambda x: x[4]}  # Constraint for childcare time (non-negative)
+        constraints = [constraint1, constraint2, constraint3]
+
+        bounds = [(0, 24)] * 4 + [(0, None)]  # Bounds for variables (including childcare time)
+
+        res = optimize.minimize(objective_function, initial_guess, method='SLSQP', constraints=constraints,
+                            bounds=bounds, tol=1e-08)  # Making the optimizer function
+
+        opt.LM = res.x[0]
+        opt.HM = res.x[1]
+        opt.LF = res.x[2]
+        opt.HF = res.x[3]
+        opt.N = res.x[4]
+        
+        return opt
 
     def solve_wF_vec(self, discrete=False):
         """ solve model for vector of female wages """
 
+        sol = self.sol
+        par = self.par
+
+        for i, w_F in enumerate(par.wF_vec):
+            par.wF = w_F
+            if discrete:
+                opt = self.solve_discrete()
+            else:
+                opt = self.solve_count()  # Changed from solve_cont() to solve_count()
+            if opt is not None:
+                sol.LM_vec[i], sol.HM_vec[i], sol.LF_vec[i], sol.HF_vec[i] = opt.LM, opt.HM, opt.LF, opt.HF
+
+    def run_regression(self):
+        """ run regression """
+
         par = self.par
         sol = self.sol
 
-        # Calculate log ratios for each wF
-        log_ratios = []
-        for wF in par.wF_vec:
-            par.wF = wF
-            results = self.solve(discrete)
-            log_ratios.append(np.log(results.HF / results.HM))
-
-        # Fit a linear regression
-        X = np.log(np.array(par.wF_vec) / par.wM).reshape(-1, 1)
-        y = np.array(log_ratios)
-        lin_reg = LinearRegression().fit(X, y)
-
-        # Save the estimated coefficients
-        sol.beta0 = lin_reg.intercept_
-        sol.beta1 = lin_reg.coef_[0]
-
-    def run_regression(self):
-        # Define alpha, sigma, and wF values
-        alpha_list = [0.25, 0.5, 0.75]
-        sigma_list = [0.5, 1.0, 1.5]
-        wF_list = [0.8, 0.9, 1.0, 1.1, 1.2]
-
-        # Create an empty dictionary to store results
-        results_dict = {}
-
-        # Loop over all combinations of alpha, sigma, and wF
-        for alpha in alpha_list:
-            for sigma in sigma_list:
-                for wF in wF_list:
-                    # Set parameter values
-                    self.par.alpha = alpha
-                    self.par.sigma = sigma
-                    self.par.wF = wF
-
-                    # Solve the model
-                    sol = self.solve()
-
-                    # Calculate log ratios
-                    log_HF_HM = np.log(sol.HF / sol.HM)
-                    log_wF_wM = np.log(self.par.wF / self.par.wM)
-
-                    # Store results in dictionary
-                    if (alpha, sigma) not in results_dict:
-                        results_dict[(alpha, sigma)] = []
-                    results_dict[(alpha, sigma)].append((wF, log_HF_HM, log_wF_wM))
-
-        # Initialize table
-        table = []
-
-        # Perform regression for each combination of alpha and sigma
-        for alpha in alpha_list:
-            for sigma in sigma_list:
-                # Initialize arrays for regression
-                X = np.empty((0,))
-                Y = np.empty((0,))
-
-                # Fill arrays with data
-                for wF, log_HF_HM, log_wF_wM in results_dict[(alpha, sigma)]:
-                    X = np.append(X, log_wF_wM)
-                    Y = np.append(Y, log_HF_HM)
-
-                # Perform linear regression
-                A = np.vstack([np.ones(X.size), X]).T
-                beta, sse, _, _ = np.linalg.lstsq(A, Y, rcond=None)
-
-                # Add regression results to table
-                row = [alpha, sigma, beta[0], beta[1], sse]
-                table.append(row)
-
-        df1 = pd.DataFrame(table, columns=["Alpha", "Sigma", "Beta0", "Beta1", "SSE"])
-
-        # Format floating-point numbers in DataFrame
-        df1 = df1.round({"Alpha": 2, "Sigma": 1, "Beta0": 4, "Beta1": 4, "SSE": 4})
-
-        # Format and return table
-        return df1
+        x = np.log(par.wF_vec)
+        y = np.log(sol.HF_vec/sol.HM_vec)
+        A = np.vstack([np.ones(x.size),x]).T
+        sol.beta0,sol.beta1 = np.linalg.lstsq(A,y,rcond=None)[0]
