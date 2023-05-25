@@ -118,13 +118,13 @@ class LaborSupplyGraphQ4:
 
     def optimal_labor_supply(self, w, tau):
         tilde_w = (1 - tau) * w
-        
         discriminant = self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2
 
         if discriminant < 0:
             return -float('inf')
 
         return (-self.kappa + np.sqrt(discriminant)) / (2 * tilde_w)
+
 
     def government_spending(self, w, tau, L):
         return tau * w * L
