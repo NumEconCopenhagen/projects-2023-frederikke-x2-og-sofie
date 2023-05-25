@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 from scipy.optimize import minimize_scalar
+from scipy import optimize
 
 
 class LaborSupplyModel:
@@ -251,3 +252,15 @@ class LaborSupplyGraphQ6:
         plt.grid(True)
         plt.show()
 
+        return optimal_G
+    
+    def solve_optimal_tax_rate(self, w):
+        def objective(tau):
+            G = self.solve_optimal_G(w, tau)
+            L_star = self.solve_worker_problem(w, tau, G)
+            return -self.utility(self.consumption(w, tau, L_star), G)
+        
+        result = optimize.minimize_scalar(objective, bounds=(0, 1), method='bounded')
+        optimal_tax_rate = result.x
+        optimal_G = self.solve_optimal_G(w, optimal_tax_rate)
+        return optimal_tax_rate, optimal_G
