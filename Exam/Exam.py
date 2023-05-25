@@ -2,6 +2,7 @@ import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
+from scipy.optimize import minimize_scalar
 
 
 class LaborSupplyModel:
@@ -185,59 +186,28 @@ class LaborSupplyGraphQ5:
         self.rho = rho
         self.epsilon = epsilon
 
-    def optimal_labor_supply(self, w, tau):
-        tilde_w = (1 - tau) * w
-        discriminant = self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2
+    def utility(self, C, G):
+        return (((self.alpha * C**((self.sigma - 1) / self.sigma) + (1 - self.alpha) * G**((self.sigma - 1) / self.sigma))**(self.sigma / (1 - self.sigma)))**(1 - self.rho) - 1) / (1 - self.rho) - self.nu * (C**self.epsilon) / (1 + self.epsilon)
 
-        if discriminant < 0:
-            return -float('inf')
-
-        return (-self.kappa + np.sqrt(discriminant)) / (2 * tilde_w)
-
-    def government_spending(self, w, tau, L):
-        return tau * w * L
-
-    def worker_utility(self, w, tau, L):
-        tilde_w = (1 - tau) * w
-        C = self.kappa + (1 - tau) * w * L
-
-        if L <= 0 or C <= 0:
-            return float('-inf')
-
-        utility = ((self.alpha * C**((self.sigma - 1) / self.sigma) +
-                    (1 - self.alpha) * self.G**((self.sigma - 1) / self.sigma))**((self.sigma) / (1 - self.sigma))
-                   )**(1 - self.rho) / (1 - self.rho) - self.nu * (L**(1 + self.epsilon)) / (1 + self.epsilon)
-
-        return utility
+    def consumption(self, w, tau, L):
+        return self.kappa + (1 - tau) * w * L
 
     def solve_worker_problem(self, w, tau, G):
-        L = self.optimal_labor_supply(w, tau)
-        utility = self.worker_utility(w, tau, L)
-        return L, utility
+        objective = lambda L: abs(G - tau * w * L * ((1 - tau) * w * L) ** ((self.sigma - 1) / self.sigma))
+        result = minimize_scalar(objective, bounds=(0, 24), method='bounded')
+        return result.x
 
-    def solve_for_G(self, w, tau):
-        def equation(G):
-            L, _ = self.solve_worker_problem(w, tau, G)
-            return G - self.government_spending(w, tau, L)
-
-        # Use fsolve to find the value of G that satisfies the equation
-        G_solution = fsolve(equation, 1.0)  # Initial guess: 1.0
-
-        return G_solution[0]
+    def solve_optimal_G(self, w, tau):
+        L_star = self.solve_worker_problem(w, tau, tau * w * self.solve_worker_problem(w, tau, 24))
+        G = tau * w * L_star * ((1 - tau) * w * L_star) ** ((self.sigma - 1) / self.sigma)
+        return G
 
     def plot_optimal_G(self, w, tau_range):
-        optimal_G_values = []
-        for tau in tau_range:
-            optimal_G = self.solve_for_G(w, tau)
-            optimal_G_values.append(optimal_G)
+        optimal_G = [self.solve_optimal_G(w, tau) for tau in tau_range]
 
-        plt.plot(tau_range, optimal_G_values)
+        plt.plot(tau_range, optimal_G)
         plt.xlabel('Tax Rate (tau)')
         plt.ylabel('Optimal G')
         plt.title('Optimal G vs. Tax Rate')
         plt.grid(True)
         plt.show()
-
-
-
-
