@@ -1,6 +1,8 @@
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import fsolve
+
 
 class LaborSupplyModel:
     def __init__(self):
@@ -172,3 +174,70 @@ class LaborSupplyGraphQ4:
 
         print(f"The socially optimal tax rate maximizing worker utility: tau* = {optimal_tau}")
         print(f"The maximum worker utility: U* = {max_utility}")
+
+
+class LaborSupplyGraphQ5:
+    def __init__(self, alpha, kappa, nu, sigma, rho, epsilon):
+        self.alpha = alpha
+        self.kappa = kappa
+        self.nu = nu
+        self.sigma = sigma
+        self.rho = rho
+        self.epsilon = epsilon
+
+    def optimal_labor_supply(self, w, tau):
+        tilde_w = (1 - tau) * w
+        discriminant = self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2
+
+        if discriminant < 0:
+            return -float('inf')
+
+        return (-self.kappa + np.sqrt(discriminant)) / (2 * tilde_w)
+
+    def government_spending(self, w, tau, L):
+        return tau * w * L
+
+    def worker_utility(self, w, tau, L):
+        tilde_w = (1 - tau) * w
+        C = self.kappa + (1 - tau) * w * L
+
+        if L <= 0 or C <= 0:
+            return float('-inf')
+
+        utility = ((self.alpha * C**((self.sigma - 1) / self.sigma) +
+                    (1 - self.alpha) * self.G**((self.sigma - 1) / self.sigma))**((self.sigma) / (1 - self.sigma))
+                   )**(1 - self.rho) / (1 - self.rho) - self.nu * (L**(1 + self.epsilon)) / (1 + self.epsilon)
+
+        return utility
+
+    def solve_worker_problem(self, w, tau, G):
+        L = self.optimal_labor_supply(w, tau)
+        utility = self.worker_utility(w, tau, L)
+        return L, utility
+
+    def solve_for_G(self, w, tau):
+        def equation(G):
+            L, _ = self.solve_worker_problem(w, tau, G)
+            return G - self.government_spending(w, tau, L)
+
+        # Use fsolve to find the value of G that satisfies the equation
+        G_solution = fsolve(equation, 1.0)  # Initial guess: 1.0
+
+        return G_solution[0]
+
+    def plot_optimal_G(self, w, tau_range):
+        optimal_G_values = []
+        for tau in tau_range:
+            optimal_G = self.solve_for_G(w, tau)
+            optimal_G_values.append(optimal_G)
+
+        plt.plot(tau_range, optimal_G_values)
+        plt.xlabel('Tax Rate (tau)')
+        plt.ylabel('Optimal G')
+        plt.title('Optimal G vs. Tax Rate')
+        plt.grid(True)
+        plt.show()
+
+
+
+
