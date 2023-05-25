@@ -4,16 +4,19 @@ from scipy.optimize import minimize_scalar
 
 class HairSalonQ1:
     def __init__(self, kappa, eta, w):
+        #Setting up variables
         self.kappa = sp.Symbol('kappa')
         self.eta = sp.Symbol('eta')
         self.w = sp.Symbol('w')
         self.ell = sp.Symbol('ell')
     
     def calculate_profit(self, ell):
+        #Calculating the profit given af level of input, hairdressers (ell)
         profit = self.kappa * ell**(1 - self.eta) - self.w * ell
         return profit
     
     def calculate_optimal_ell(self):
+        #Calculating the optimal level of hairdresser ell that maximizes profit
         optimal_ell_expr = ((1 - self.eta) * self.kappa / self.w) ** (1 / self.eta)
         return optimal_ell_expr
 
@@ -21,6 +24,7 @@ class HairSalonQ1:
 
 class HairSalonQ2:
     def __init__(self, rho, eta, wage, iota, sigma_epsilon, R):
+        #Setting the parameters 
         self.rho = rho
         self.eta = eta
         self.wage = wage
@@ -29,6 +33,7 @@ class HairSalonQ2:
         self.R = R
 
     def calculate_h(self, epsilon_series):
+        #Calculating the ex-post value of the hair salon conditional on the shock series 
         kappa_series = [1.0]  # Initial kappa
         ell_series = [0]  # Initial ell
         h_value = 0.0
@@ -38,7 +43,7 @@ class HairSalonQ2:
             kappa_t = np.exp(self.rho * np.log(kappa_series[-1]) + epsilon_series[t])
             kappa_series.append(kappa_t)
 
-            # Calculate ell_t based on the policy from Question 1
+            # Calculate l_t based on the policy from Question 1
             ell_t = ((1 - self.eta) * kappa_t / self.wage) ** (1 / self.eta)
             ell_series.append(ell_t)
 
@@ -52,11 +57,16 @@ class HairSalonQ2:
         return h_value
 
     def calculate_expected_h(self, K):
+        #Calculate the expected value of h by averaging over K random shock series
         h_values = []
         for _ in range(K):
+            #Generating a random shock series 
             epsilon_series = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon, size=120)
+            #Calculate the ex-post value of the salon for the generated shock series
             h_value = self.calculate_h(epsilon_series)
+            #Store the calculated h value in a list
             h_values.append(h_value)
+            #Calculate the average of the h values
         return np.mean(h_values)
     
 #question 3
@@ -76,6 +86,7 @@ class HairSalonQ3:
         ell_series = [0]  # Initial ell
         h_value = 0.0
 
+        #Loop over the time periods
         for t in range(120):
             # Calculate kappa_t based on AR(1) process
             kappa_t = np.exp(self.rho * np.log(kappa_series[-1]) + epsilon_series[t])
@@ -118,6 +129,7 @@ class HairSalonoptimalQ4:
         self.sigma_epsilon = sigma_epsilon
         self.R = R
 
+    #Calculating the ex-post value of the hair salon for a given shock series and delta
     def calculate_h(self, epsilon_series, delta):
         kappa_series = [1.0]  # Initial kappa
         ell_series = [0]  # Initial ell
@@ -146,6 +158,8 @@ class HairSalonoptimalQ4:
         return h_value
 
     def objective_function(self, delta):
+
+        #We minimize the objective function in order to find the optimal delta 
         K = 1000  # Number of shock series to simulate
         h_values = []
 
@@ -154,7 +168,7 @@ class HairSalonoptimalQ4:
             h_value = self.calculate_h(epsilon_series, delta)
             h_values.append(h_value)
 
-        return -np.mean(h_values)  # Negate to maximize the objective function
+        return -np.mean(h_values)  # Negative to maximize the objective function
     
 
 #Question 5
@@ -163,13 +177,12 @@ class HairSalonDynamicQ5:
     def __init__(self, base_price):
         self.base_price = base_price
 
+    #Calculating the dynamically adjusted price based on demand level
     def calculate_dynamic_price(self, demand_level):
-        # Implement your dynamic pricing algorithm here
+        # Implement the dynamic pricing algorithm here
         # Use the demand level to adjust the base price
-        # You can consider other factors like time of year, hairdresser availability, etc.
         # Return the dynamically adjusted price
 
-        # Example: Adjust the base price based on the demand level
         dynamic_price = self.base_price * (1 + demand_level)  # Adjust the price based on demand level
 
         return dynamic_price
@@ -181,6 +194,7 @@ class DemandDataQ5:
         self.sigma_epsilon = sigma_epsilon
 
     def generate_epsilon_series(self):
+        #Generate a series of epsilon values based on an AR(1) process
         epsilon_series = []
         epsilon_t = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon)
 
