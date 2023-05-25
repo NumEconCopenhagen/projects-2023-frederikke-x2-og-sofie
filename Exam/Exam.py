@@ -109,3 +109,56 @@ class LaborSupplyGraphQ3:
 
         plt.tight_layout()
         plt.show()
+
+class LaborSupplyGraphQ4:
+    def __init__(self, alpha, kappa, nu):
+        self.alpha = alpha
+        self.kappa = kappa
+        self.nu = nu
+
+    def optimal_labor_supply(self, w, tau):
+        tilde_w = (1 - tau) * w
+        return (-self.kappa + np.sqrt(self.kappa**2 + 4 * self.alpha / self.nu * tilde_w**2)) / (2 * tilde_w)
+
+    def government_spending(self, w, tau, L):
+        return tau * w * L
+
+    def worker_utility(self, w, tau, L):
+        tilde_w = (1 - tau) * w
+        C = self.kappa + (1 - tau) * w * L
+        return np.log(C**self.alpha * (tau * w * L)**(1 - self.alpha)) - self.nu * L**2 / 2
+
+    def maximize_utility(self, w, tau_range):
+        max_utility = float('-inf')
+        optimal_tau = None
+
+        for tau in tau_range:
+            L = self.optimal_labor_supply(w, tau)
+            utility = self.worker_utility(w, tau, L)
+
+            if utility > max_utility:
+                max_utility = utility
+                optimal_tau = tau
+
+        return optimal_tau, max_utility
+
+    def plot_optimal_tax_rate(self, w, tau_range):
+        optimal_tau, max_utility = self.maximize_utility(w, tau_range)
+
+        utility_values = []
+        for tau in tau_range:
+            L = self.optimal_labor_supply(w, tau)
+            utility = self.worker_utility(w, tau, L)
+            utility_values.append(utility)
+
+        plt.plot(tau_range, utility_values)
+        plt.xlabel('Tax Rate (tau)')
+        plt.ylabel('Worker Utility')
+        plt.title('Worker Utility vs. Tax Rate')
+        plt.axvline(x=optimal_tau, color='r', linestyle='--', label='Optimal Tax Rate')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+        print(f"The socially optimal tax rate maximizing worker utility: tau* = {optimal_tau}")
+        print(f"The maximum worker utility: U* = {max_utility}")
