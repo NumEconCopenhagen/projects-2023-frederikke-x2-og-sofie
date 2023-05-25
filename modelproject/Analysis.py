@@ -2,6 +2,7 @@ from scipy import optimize
 import sympy as sm
 import numpy as np
 from types import SimpleNamespace
+from IPython.display import display
 
 class AnalysismodelclassOLG():
     # The OLG model is being coded

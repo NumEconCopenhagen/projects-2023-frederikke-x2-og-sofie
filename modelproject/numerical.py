@@ -227,7 +227,7 @@ class NumericalmodelclassOLG():
         self.plot_k_t = np.empty(self.kN)   # 1. Finding the steady state value capital when k_t is appriximately close to k_t+1
         for i, k_t1 in enumerate(self.plot_k_t1):
             k_t = self.equilibrium(k_t1)
-            self.plot_k_t1[i] = k_t
+            self.plot_k_t[i] = k_t
             if (np.abs(k_t1 - k_t) < 0.01 and k_t > 0.01 and k_t < 19):
                 self.ss = k_t 
             
