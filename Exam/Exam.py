@@ -1,37 +1,40 @@
-import math
+import sympy as sp
 
-class UtilityMaximization:
-    def __init__(self, alpha=0.5, kappa=1.0, nu=1/(2*16**2), w=1.0, tau=0.3, G=1.0):
-        self.alpha = alpha
-        self.kappa = kappa
-        self.nu = nu
-        self.w = w
-        self.tau = tau
-        self.G = G
+class LaborSupplyModel:
+    def __init__(self):
+        # Declare the symbolic variables
+        self.L, self.w, self.tau, self.G, self.alpha, self.nu, self.kappa, self.w_tilde = sp.symbols(
+            'L w tau G alpha nu kappa w_tilde'
+        )
 
-    def utility(self, L):
-        C = self.kappa + (1 - self.tau) * self.w * L
-        utility_value = math.log(C ** self.alpha * self.G ** (1 - self.alpha)) - self.nu * L ** 2 / 2
-        return utility_value
+        # Define the utility function
+        self.C = self.kappa + (1 - self.tau) * self.w * self.L
+        self.utility = sp.log(self.C**self.alpha * self.G**(1 - self.alpha)) - self.nu * self.L**2 / 2
 
-    def maximize_utility(self):
-        max_utility = float("-inf")
-        optimal_labor = None
+    def solve_optimal_labor_supply(self):
+        # Differentiate utility function with respect to L
+        utility_diff = sp.diff(self.utility, self.L)
 
-        for L in range(25):
-            utility_value = self.utility(L)
-            if utility_value > max_utility:
-                max_utility = utility_value
-                optimal_labor = L
+        # Solve for the optimal labor supply choice
+        optimal_L = sp.solve(utility_diff, self.L)
 
-        return optimal_labor, max_utility
-    
-    def calculate_optimal_labor(self):
-        tw = (1 - self.tau) * self.w
-        discriminant = self.kappa ** 2 + 4 * (self.alpha / self.nu) * tw ** 2
-        if discriminant >= 0:
-            optimal_labor = (-self.kappa + math.sqrt(discriminant)) / (2 * tw)
-            return optimal_labor
+        # Substitute w with (1 - tau) * w in the optimal solution
+        optimal_L = optimal_L[0].subs(self.w, self.w_tilde / (1 - self.tau))
 
-        return None
+        return optimal_L
+
+    def display_optimal_labor_supply_equation(self):
+        # Get the optimal labor supply choice expression
+        optimal_L = self.solve_optimal_labor_supply()
+
+        # Express the optimal labor supply choice in terms of w_tilde
+        optimal_L_expr = (-self.kappa + sp.sqrt(self.kappa**2 + 4 * self.alpha / self.nu * self.w_tilde**2)) / (2 * self.w_tilde)
+
+        # Create an equation for the optimal labor supply choice
+        optimal_L_eq = sp.Eq(self.L, optimal_L_expr)
+
+        # Print the equation for the optimal labor supply choice
+        print("Optimal labor supply choice:")
+        sp.pprint(optimal_L_eq)
+
    
