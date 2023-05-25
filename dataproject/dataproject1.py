@@ -23,7 +23,7 @@ def _plot_timeseries(dataframes, variable, sex): #making the timeseries graph
 def plot_timeseries(dataframes): #making the interactive element
     widgets.interact(_plot_timeseries, 
     dataframes = widgets.fixed(dataframes), #choosing the dataset, used in the grafh
-    variable = widgets.Dropdown(
+    variable = widgets.Dropdown( #Chooses what variabel is used in the interactive plot
         description='EDUCATION LEVEL', #namine the interactive element
         options=['H40 Short cycle higher education','H50 Vocational bachelors educations','H70 Masters programs'], #Defining which value 
         #to choose form in the interactive element
