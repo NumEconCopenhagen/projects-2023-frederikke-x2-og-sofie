@@ -4,15 +4,16 @@ from scipy.optimize import minimize
 
 class GriewankOptimizer:
     def __init__(self, bounds, tolerance, warmup_iters, max_iters):
+        """ setup model """
         self.bounds = bounds
         self.tolerance = tolerance
         self.warmup_iters = warmup_iters
         self.max_iters = max_iters
-        self.x_star = None           #The variable is used to store the global minimum
-        self.history = []            #The list is made to store the optimization trajectory
+        self.x_star = None           #This variable is used to store the global minimum
+        self.history = []            #The list is to store the optimization curve
 
     def griewank(self, x):
-        #Setting up the Griewank function
+        #The Griewank function is defined
         return self.griewank_(x[0], x[1])
 
     def griewank_(self, x1, x2):
