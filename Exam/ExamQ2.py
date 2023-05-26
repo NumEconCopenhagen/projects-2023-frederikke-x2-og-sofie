@@ -50,7 +50,8 @@ class HairSalonQ2:
 
             # Calculate the period profit
             profit = kappa_t * ell_t ** (1 - self.eta) - self.wage * ell_t
-            adjustment_cost = self.iota if ell_t != ell_series[-2] else 0
+            adjustment_cost = self.iota if ell_t != ell_series[-2] else 0 #adjustment_cost is set to iota if ell_t is not equal to
+            #the last element in the ell_series list; otherwise, it is set to 0.
             period_value = profit - adjustment_cost
             discounted_value = period_value * self.R ** (-t)
             h_value += discounted_value
@@ -95,11 +96,15 @@ class HairSalonQ3:
 
             # Calculate ell_t based on the policy with threshold delta
             ell_star = ((1 - self.eta) * kappa_t / self.wage) ** (1 / self.eta)
-            if t > 0 and abs(ell_series[-1] - ell_star) > self.delta:
-                ell_t = ell_star
-            else:
+            if t > 0 and abs(ell_series[-1] - ell_star) > self.delta: #checks if t is greater then 0, 
+                #if the absolute difference between the previous value of ell and ell_star is greater than the value of delta.  
+                ell_t = ell_star #If the statement is true, a significant change in ell has occurred, 
+                #and the new value ell_t is set to ell_star.
+            else: #if the statement is false he change in ell is not significant, and the new value ell_t is set to the same 
+                #value in the previous time period, ell_series[-1].
                 ell_t = ell_series[-1]
-            ell_series.append(ell_t)
+            ell_series.append(ell_t) #The updated value of ell_t is appended to the ell_series list. This shows the sequence 
+            #of ell values over time.
 
             # Calculate the period profit
             profit = kappa_t * ell_t ** (1 - self.eta) - self.wage * ell_t
@@ -111,12 +116,14 @@ class HairSalonQ3:
         return h_value
 
     def calculate_expected_h(self, K):
-        h_values = []
-        for _ in range(K):
-            epsilon_series = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon, size=120)
-            h_value = self.calculate_h(epsilon_series)
-            h_values.append(h_value)
-        return np.mean(h_values)
+        h_values = [] #Create empty list, to store the values from the for loop
+        for _ in range(K): #iterates K loops, where _ is a placeholder 
+            epsilon_series = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon, size=120) #a randome series 
+            #of epsilon values are generated 120 times, and drawend from a normal distrubution with a mean of -0.5*sigma_espilon**2 
+            #and standard diviation of sigma_epsilon
+            h_value = self.calculate_h(epsilon_series) #calculates h with the generated epsilon series
+            h_values.append(h_value) #append the calulated h values to the empty list
+        return np.mean(h_values) #returns the generated avarage 
     
 
 #Question 4
