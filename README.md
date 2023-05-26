@@ -1,4 +1,4 @@
-# \[Group name\]
+# Frederikke-x2-sofie
 
 **Group members:**
 - Frederikke Larsen (zpf492)
