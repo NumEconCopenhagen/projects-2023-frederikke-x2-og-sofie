@@ -1,4 +1,4 @@
-# a. Python packages are imported
+#Python packages are imported
 import numpy as np
 from scipy import optimize
 import sympy as sm
@@ -29,14 +29,14 @@ class NumericalmodelclassOLG():
         self.A = 20             #Technology 
 
         #The variables of the transition curve is defined
-            # self refers to the variables and paremeters from the "setup(self)" 
+            #self refers to the variables and paremeters from the "setup(self)" 
         self.k_N = 1000         #Amount of grids on the transition diagram
         self.k_max = 20         #The maximum level of capital
         self.k_min = 1e-6       #The minimum level of capital
 
 
     def par_new(self, kwargs):
-        # self refers to the variables and paremeters from the "setup(self)"
+        #self refers to the variables and paremeters from the "setup(self)"
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -55,8 +55,8 @@ class NumericalmodelclassOLG():
     
     
     def opt_firm(self,k_t):
-        # w_t: Real wage
-        # R_t: Gross real interest rate
+        #w_t: Real wage
+        #R_t: Gross real interest rate
         R_t = self.y_p(k_t)
         w_t = self.y(k_t) - self.y_p(k_t) * k_t
         return R_t, w_t
