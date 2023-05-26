@@ -189,11 +189,13 @@ class HairSalonDynamicQ5:
         return ((1 - self.eta) * kappa_t / self.w) ** (1 / self.eta)
 
     def dynamic_pricing(self, kappa_t, ell_t, desired_profit_margin):
-        if ell_t == 0:
-            price = self.w * (1 + desired_profit_margin)
-        else:
-            price = kappa_t * ell_t ** (-self.eta) * (1 + desired_profit_margin)
-        return price
+        if ell_t == 0: #If ell_t is equal to 0, no hairdressers are employed
+            price = self.w * (1 + desired_profit_margin) #he price is set to the wage with 
+            #a desired profit margin added to cover the costs
+        else: #If ell_t is greater than 0, meaning hairdressers are employed
+            price = kappa_t * ell_t ** (-self.eta) * (1 + desired_profit_margin)  #the price is the demand, 
+            #plus a desired profit margin added to cover the costs
+        return price #the calculated price is returned
 
     def simulate_shock_series(self):
         epsilon = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon, size=120)
