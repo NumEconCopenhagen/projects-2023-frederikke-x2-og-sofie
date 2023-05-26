@@ -90,15 +90,16 @@ class HairSalonQ3:
         kappa = [1]
         ell = [0]
 
-        for t in range(120):
-            kappa_t = self.rho * np.log(kappa[t]) + epsilon[t]
-            ell_t = self.policy(kappa_t)
-            if t > 0 and abs(ell[t-1] - ell_t) > self.delta:
-                ell_t = ell_t
+        for t in range(120): # Calculate kappa_t based on AR(1) process with 120 iterations from 0 to 119
+            kappa_t = self.rho * np.log(kappa[t]) + epsilon[t] #the value of kappa_t is calculated
+            ell_t = self.policy(kappa_t) #ell_t is calculated using the policy, with the calculated kappa_t from abouve
+            if t > 0 and abs(ell[t-1] - ell_t) > self.delta: #controls it is not the first period, and if the  the 
+                #absolute difference between the previous value of ell and the current value are greater than delta
+                ell_t = ell_t #if true the value of ell_t is assinged to itself, because there has been a change in ell
             else:
-                ell_t = ell[t]
-            kappa.append(np.exp(kappa_t))
-            ell.append(ell_t)
+                ell_t = ell[t] #if false the previous value of ell is assigned to ell_t indication no change
+            kappa.append(np.exp(kappa_t)) #the calculated values of kappa_t is appended to this list
+            ell.append(ell_t) #the calculated values of ell_t is appended to this list
 
         return kappa, ell
 
