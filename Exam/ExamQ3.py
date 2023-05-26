@@ -35,10 +35,11 @@ class GriewankOptimizer:
             #uniform function
 
             if k >= self.warmup_iters: #conditional statement for k. If k is greater or equal to warmup_iters the chi value 
-                #will be calculated, based on k iterations. This adjustment is to 
+                #will be calculated, based on k iterations. This adjustment is to gradually change the input af a warm up period
                 chi = 0.50 * 2 / (1 + np.exp((k - self.warmup_iters) / 100)) #We adjust the input using after warm-up period
-                x_k0 = chi * x + (1 - chi) * self.x_star
-                x_ast = self.run_optimizer(x_k0)
+                x_k0 = chi * x + (1 - chi) * self.x_star #This is the new value using the adjustet value of chi, and becomes
+                #curret best point in x_star.
+                x_ast = self.run_optimizer(x_k0) #performs optimization process for the given point and return the point x_ast 
             else:
                 x_ast = self.run_optimizer(x)  #We use this to find the local minimum
 
