@@ -247,18 +247,6 @@ class LaborSupplyGraphQ5:
         G = tau * w * L_star * ((1 - tau) * w * L_star) ** ((self.sigma - 1) / self.sigma)
         return G
 
-    def plot_optimal_G(self, w, tau_range):
-        #Finding optimal G for different tau
-        optimal_G = [self.solve_optimal_G(w, tau) for tau in tau_range]
-
-        #Plotting the optimal G and tax rates
-        plt.plot(tau_range, optimal_G)
-        plt.xlabel('Tax Rate (tau)')
-        plt.ylabel('Optimal G')
-        plt.title('Optimal G at different tax rates')
-        plt.grid(True)
-        plt.show()
-
 class LaborSupplyGraphQ6:
     def __init__(self, alpha, kappa, nu, sigma, rho, epsilon):
         self.alpha = alpha
@@ -295,20 +283,6 @@ class LaborSupplyGraphQ6:
         #Using root to find the optimal G
         result = optimize.root_scalar(objective, method='brentq', bracket=(0, 100))
         return result.root
-
-    def plot_optimal_G(self, w, tau_range):
-        #Finding the optimal G for different tau
-        optimal_G = [self.solve_optimal_G(w, tau) for tau in tau_range]
-
-        #Plotting the optimal G for different tau
-        plt.plot(tau_range, optimal_G)
-        plt.xlabel('Tax Rate (tau)')
-        plt.ylabel('Optimal G')
-        plt.title('Optimal G at different tax rates')
-        plt.grid(True)
-        plt.show()
-
-        return optimal_G
     
     def solve_optimal_tax_rate(self, w):
         def objective(tau):
