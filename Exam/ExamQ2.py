@@ -1,6 +1,7 @@
 import sympy as sp
 import numpy as np
 from scipy.optimize import minimize_scalar
+import matplotlib.pyplot as plt
 
 class HairSalonQ1:
     def __init__(self, kappa, eta, w):
@@ -169,6 +170,19 @@ class HairSalonoptimalQ4:
             h_values.append(h_value)
 
         return -np.mean(h_values)  # Negative to maximize the objective function
+    
+    def plot_h_values(self, delta_values, h_values):
+        plt.plot(delta_values, h_values)
+        plt.xlabel('Delta')
+        plt.ylabel('H')
+        plt.title('Optimal Delta vs H')
+        plt.show()
+
+    def find_optimal_delta(self, delta_lower_bound, delta_upper_bound):
+        result = minimize_scalar(self.objective_function, bounds=(delta_lower_bound, delta_upper_bound), method='bounded')
+        optimal_delta = result.x
+        optimal_h = -result.fun
+        return optimal_delta, optimal_h
     
 
 #Question 5
