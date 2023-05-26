@@ -32,37 +32,42 @@ class HairSalonQ2:
         self.eta = eta
         self.w = w
 
-    def policy(self, kappa_t):
+    def policy(self, kappa_t):#calculates the value of the policy variable based on the provided input kappa_t
+        # using the given formula
         return ((1 - self.eta) * kappa_t / self.w) ** (1 / self.eta)
 
     def simulate_shock_series(self):
-        epsilon = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon, size=120)
-        kappa = [1]
-        ell = [0]
+        epsilon = np.random.normal(-0.5 * self.sigma_epsilon ** 2, self.sigma_epsilon, size=120)#Calculate the ex-post 
+        #value of the salon for the generated shock series
+        kappa = [1] #inital kappa value
+        ell = [0] #initial ell value
 
-        for t in range(120):
-            kappa_t = self.rho * np.log(kappa[t]) + epsilon[t]
-            ell_t = self.policy(kappa_t)
-            kappa.append(np.exp(kappa_t))
-            ell.append(ell_t)
+        for t in range(120):  # Calculate kappa_t based on AR(1) process with 120 iterations from 0 to 119
+            kappa_t = self.rho * np.log(kappa[t]) + epsilon[t] #the value of kappa_t is calculated
+            ell_t = self.policy(kappa_t) #ell_t is calculated using the policy, with the calculated kappa_t from abouve
+            kappa.append(np.exp(kappa_t)) #the calculated values of kappa_t is appended to this list
+            ell.append(ell_t) #the calculated values of ell_t is appended to this list
 
-        return kappa, ell
+        return kappa, ell #returns all iterations over kappa and ell lists
 
-    def calculate_salon_value(self, kappa, ell):
+    def calculate_salon_value(self, kappa, ell): #calculates the total value of the salon over the 120 iterations
+        #by summing the the values of kappa and ell from abouve loop and the constants
         salon_value = sum([(self.R ** -t) * (kappa[t] * ell[t] ** (1 - self.eta) - self.w * ell[t] -
                                               (ell[t] != ell[t-1]) * self.iota)
                            for t in range(120)])
         return salon_value
 
     def calculate_ex_ante_value(self, K):
-        total_value = 0
+        total_value = 0 #inital value
 
-        for _ in range(K):
+        for _ in range(K): #iterates K loops, where _ is a placeholder 
+            #simulate a shock series and returns kappa and ell arrays  
             kappa, ell = self.simulate_shock_series()
-            salon_value = self.calculate_salon_value(kappa, ell)
-            total_value += salon_value
+            salon_value = self.calculate_salon_value(kappa, ell) #Calculate the value of the salon 
+            #using the simulated shock series
+            total_value += salon_value #add the salon_value to total value
 
-        H = total_value / K
+        H = total_value / K #calculate the average value of the salon 
         return H
     
 #question 3
